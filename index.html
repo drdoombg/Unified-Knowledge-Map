@@ -1,0 +1,3485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Knowledge Map">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Unified Knowledge Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--raise:#0e0e12;--raise2:#18181e;--line:#26262e;--text:#ecebf1;--muted:#8d8c99;--faint:#55545f;--ice:#a9c5ff;--ice-dim:#3b4a6b;--ok:#88d6ae;--warn:#f0b37a;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:#000}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+header{display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:end}
+h1{font-size:15px;font-weight:500;color:var(--muted);margin:0;letter-spacing:.01em}
+.figures{display:flex;gap:28px;align-items:baseline;flex-wrap:wrap;margin-top:6px}
+.fig b{display:block;font-size:40px;font-weight:500;line-height:1.05;letter-spacing:-.02em}
+.fig span{font-size:13px;color:var(--muted)}
+.fig.small b{font-size:24px;color:#cfd9f2}
+.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;justify-self:end}
+h1 .ver{color:var(--faint);font-weight:400;margin-left:6px}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--faint);display:inline-block}
+.status.account i{background:var(--ok)}.status.saving i{background:var(--ice)}.status.device i{background:var(--warn)}
+.strip{display:flex;gap:2px;height:52px;margin:22px 0 6px}
+.seg{flex-basis:0;min-width:8px;position:relative;background:var(--raise2);border:0;padding:0;border-radius:2px;overflow:hidden}
+.seg .cov{position:absolute;left:0;right:0;bottom:0;background:var(--ice-dim)}
+.seg .dep{position:absolute;left:0;right:0;bottom:0;background:var(--ice)}
+.seg em{position:absolute;left:6px;top:5px;right:4px;font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;pointer-events:none}
+.seg:hover{background:#202028}
+.legend{font-size:12px;color:var(--faint);display:flex;gap:16px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px;border-radius:1px}
+.legend .l1::before{background:var(--ice)}.legend .l2::before{background:var(--ice-dim)}
+.tabs{display:flex;gap:4px;margin:28px 0 0;border-bottom:1px solid var(--line)}
+.tab{background:none;border:0;padding:10px 14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--ice)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 0;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.tools input[type=search]{flex:1 1 220px;min-width:0;background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.tools select,.btn{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:nowrap}
+.btn:hover,.tools select:hover{border-color:#3a3a44}
+.btn.primary{background:var(--ice);color:#0b1426;border-color:var(--ice);font-weight:500}
+.spacer{flex:1}
+#list{border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:10px;min-height:38px;padding:3px 8px 3px calc(8px + var(--d)*20px);border-bottom:1px solid #141418}
+.row:hover{background:#0a0a0e}
+.row.dom{min-height:46px;background:#07070a}
+.row.dom .nm{font-weight:600;font-size:16px}
+.row.d1 .nm{font-weight:500}
+.tw{width:22px;height:22px;flex:none;border:0;background:none;color:var(--muted);padding:0;border-radius:4px;transition:transform .15s}
+.tw.open{transform:rotate(90deg)}
+.tw.none{visibility:hidden}
+.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+.row.hasKids .nm{cursor:pointer}
+.custom-tag{font-size:11px;color:var(--faint);margin-left:6px}
+.agg{display:flex;align-items:center;gap:8px;flex:none;font-size:12px;color:var(--muted)}
+.agg .bar{width:72px;height:4px;background:var(--raise2);border-radius:2px;overflow:hidden;position:relative}
+.agg .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--ice)}
+.agg .bar s{position:absolute;left:0;top:0;bottom:0;background:var(--ice-dim)}
+.agg .pc{width:48px;text-align:right}
+.meter{display:flex;align-items:flex-end;gap:2px;height:16px;flex:none}
+.meter i{width:4px;background:var(--raise2);border-radius:1px}
+.meter i.on{background:var(--ice)}
+.meter i:nth-child(1){height:5px}.meter i:nth-child(2){height:7.5px}.meter i:nth-child(3){height:10px}.meter i:nth-child(4){height:12.5px}.meter i:nth-child(5){height:15px}
+.nt{width:16px;flex:none;text-align:center;font-size:13px}
+.nt.ok{color:var(--ok)}.nt.no{color:var(--faint)}
+.act{flex:none;border:1px solid transparent;background:none;border-radius:6px;padding:3px 9px;color:var(--muted);font-size:13px}
+.act:hover{border-color:var(--line);color:var(--text)}
+.act.log{color:var(--ice)}
+.act.del.arm{color:var(--warn);border-color:#4a3622}
+.empty{padding:40px 8px;color:var(--muted)}
+#visual{padding:80px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px;margin-top:20px}
+#visual p{max-width:44ch;margin:8px auto 0;font-size:14px;color:var(--faint)}
+dialog{background:var(--raise);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:0;width:min(580px,calc(100% - 24px));max-height:calc(100% - 40px)}
+dialog::backdrop{background:rgba(0,0,0,.72)}
+.dh{padding:20px 22px 0}
+.crumb{font-size:12px;color:var(--faint)}
+.dh h2{margin:4px 0 0;font-size:22px;font-weight:500;line-height:1.25}
+.cur{font-size:13px;color:var(--muted);margin-top:4px}
+.db{padding:16px 22px 20px}
+.lab{font-size:13px;color:var(--muted);margin:16px 0 8px;display:block}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.levels label{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px 8px 9px;background:var(--raise2);border:1px solid var(--line);border-radius:8px;font-size:12px;line-height:1.3;cursor:pointer;min-height:84px}
+.levels input{position:absolute;opacity:0;pointer-events:none}
+.levels label .n{font-size:18px;font-weight:500;color:var(--faint)}
+.levels label:has(input:checked){border-color:var(--ice);background:#141c2c}
+.levels label:has(input:checked) .n{color:var(--ice)}
+.levels label:has(input:focus-visible){outline:2px solid var(--ice);outline-offset:2px}
+.levels label.was .n::after{content:" now";font-size:11px;color:var(--muted);font-weight:400}
+.field{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--ice);width:16px;height:16px}
+.check.review{padding:10px 12px;border:1px solid #33405e;border-radius:8px;background:#0c1220}
+.err{color:var(--warn);font-size:13px;margin-top:8px;min-height:0}
+.dfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.hist{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.hist li{padding:10px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:13px}
+.hist .lv{color:var(--text);font-weight:500}
+.hist time{color:var(--faint);text-align:right}
+.hist .cx{color:var(--muted);grid-column:1/2}
+.hist .hb{grid-column:2/3;display:flex;gap:4px;justify-content:flex-end}
+.hist .hb button{background:none;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted)}
+.hist .hb .ok{color:var(--ok)}
+.hist .hb .arm{color:var(--warn);border-color:#4a3622}
+.none-yet{color:var(--faint);font-size:13px;padding:8px 0}
+textarea.field{min-height:160px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--raise2);border:1px solid var(--line);padding:9px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.show{opacity:1}
+@media (max-width:640px){
+ header{grid-template-columns:1fr}.status{justify-self:start}
+ .fig b{font-size:32px}
+ .agg .bar{display:none}
+ .row{gap:6px;padding-left:calc(4px + var(--d)*12px)}
+ .levels{grid-template-columns:1fr}
+ .levels label{min-height:0;flex-direction:row;align-items:center}
+}
+@media (prefers-reduced-motion:reduce){.tw,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <h1>Unified Knowledge Map <span class="ver">v1</span></h1>
+  <div class="figures">
+   <div class="fig"><b id="fDepth">0%</b><span>competence across the whole map</span></div>
+   <div class="fig small"><b id="fCov">0%</b><span>topics touched</span></div>
+   <div class="fig small"><b id="fCount">0</b><span id="fCountL">of 0 topics</span></div>
+  </div>
+ </div>
+ <div class="status device" id="status"><i></i><span>Saved on this device</span></div>
+</header>
+<div class="strip" id="strip" aria-label="Domains"></div>
+<div class="legend"><span class="l1">Competence</span><span class="l2">Touched at any level</span><span>Segment width = number of topics in the domain</span></div>
+
+<div class="tabs" role="tablist">
+ <button class="tab" role="tab" aria-selected="true" data-tab="list">List</button>
+ <button class="tab" role="tab" aria-selected="false" data-tab="visual">Visual</button>
+</div>
+
+<section id="listView">
+ <div class="tools">
+  <input type="search" id="q" placeholder="Search topics, e.g. PCA" aria-label="Search topics">
+  <select id="filter" aria-label="Filter">
+   <option value="all">All topics</option>
+   <option value="logged">Logged</option>
+   <option value="unlogged">Not logged</option>
+  </select>
+  <button class="btn" id="collapse">Collapse all</button>
+  <span class="spacer"></span>
+  <button class="btn" id="addDomain">Add domain</button>
+  <button class="btn" id="backup">Back up</button>
+  <button class="btn" id="restore">Restore</button>
+ </div>
+ <div id="list"></div>
+</section>
+
+<section id="visualView" hidden>
+ <div id="visual">The visual map will live here.<p>For now, log in the list view. Once the logs have some weight, this tab becomes the map.</p></div>
+</section>
+</div>
+
+<dialog id="logDlg">
+ <div class="dh">
+  <div class="crumb" id="lCrumb"></div>
+  <h2 id="lName"></h2>
+  <div class="cur" id="lCur"></div>
+ </div>
+ <div class="db">
+  <span class="lab">Depth</span>
+  <div class="levels" id="lLevels"></div>
+  <label class="lab" for="lCtx">Context</label>
+  <input class="field" id="lCtx" list="ctxList" placeholder="Why this, where from: e.g. Ep 15: Immune map" autocomplete="off">
+  <datalist id="ctxList"></datalist>
+  <label class="check"><input type="checkbox" id="lNotes"><span>Notes made at this level</span></label>
+  <label class="check review" id="lReviewWrap" hidden><input type="checkbox" id="lReview"><span>I reviewed my notes from the earlier level before upgrading</span></label>
+  <div class="err" id="lErr" role="alert"></div>
+  <div class="dfoot">
+   <button class="btn" id="lClose">Close</button>
+   <button class="btn primary" id="lSave">Log it</button>
+  </div>
+  <span class="lab">History</span>
+  <ul class="hist" id="lHist"></ul>
+ </div>
+</dialog>
+
+<dialog id="addDlg">
+ <div class="dh"><div class="crumb" id="aCrumb"></div><h2 id="aTitle">Add subtopic</h2></div>
+ <div class="db">
+  <input class="field" id="aName" placeholder="Name" autocomplete="off">
+  <div class="err" id="aErr" role="alert"></div>
+  <div class="dfoot"><button class="btn" id="aCancel">Cancel</button><button class="btn primary" id="aSave">Add</button></div>
+ </div>
+</dialog>
+
+<dialog id="resDlg">
+ <div class="dh"><h2>Restore a backup</h2><div class="cur">This replaces everything currently logged.</div></div>
+ <div class="db">
+  <span class="lab">Choose a backup file</span>
+  <input type="file" id="rFile" accept=".json,application/json">
+  <span class="lab">Or paste backup text</span>
+  <textarea class="field" id="rText" placeholder='{"app":"knowledge-model", ...}'></textarea>
+  <div class="err" id="rErr" role="alert"></div>
+  <div class="dfoot"><button class="btn" id="rCancel">Cancel</button><button class="btn primary" id="rGo">Restore backup</button></div>
+ </div>
+</dialog>
+
+<dialog id="copyDlg">
+ <div class="dh"><h2>Copy your backup</h2><div class="cur">The download didn't start, so copy this text into a .json file.</div></div>
+ <div class="db">
+  <textarea class="field" id="cText" readonly></textarea>
+  <div class="dfoot"><button class="btn" id="cClose">Close</button><button class="btn primary" id="cCopy">Copy text</button></div>
+ </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const SYL_V='2026-10-04c';
+const SYL=`Mathematics
+ Nature of mathematics
+  Mathematical hierarchy
+  Patterns and simplification
+  Abstraction and generalisation
+  Mathematics in music
+  Mathematics in language
+  Millennium problems
+  Notation and symbols
+  History of mathematics
+ Foundations and logic
+  Propositional logic
+   Connectives
+   Truth tables
+   Tautologies and contradictions
+   Logical equivalence
+   Normal forms (CNF, DNF)
+   Natural deduction
+  Predicate logic
+   Quantifiers
+   Free and bound variables
+   First-order logic
+   Higher-order logic
+  Proof techniques
+   Direct proof
+   Proof by contradiction
+   Proof by induction
+    Weak induction
+    Strong induction
+    Structural induction
+   Contrapositive
+   Proof by cases
+   Existence and uniqueness proofs
+   Counterexamples
+  Set theory
+   Sets and operations
+   Venn diagrams
+   Power sets
+   Cartesian products
+   Relations
+    Equivalence relations
+    Partial orders
+   Functions
+    Injective, surjective, bijective
+    Composition and inverses
+   Cardinality
+    Countable sets
+    Uncountable sets
+    Cantor's diagonal argument
+   Ordinals and cardinals
+   Axiomatic set theory (ZFC)
+   Axiom of choice
+   Continuum hypothesis
+  Mathematical logic
+   Model theory
+   Proof theory
+   Gödel's completeness theorem
+   Gödel's incompleteness theorems
+  Computability
+   Recursive functions
+   Turing computability
+   Halting problem
+   Decidability
+  Number systems
+   Natural numbers
+   Integers
+   Rational numbers
+   Real numbers
+   Complex numbers
+   Quaternions
+   Number bases
+   Construction of the reals
+ Arithmetic
+  Operations
+   Addition and subtraction
+   Multiplication and division
+   Order of operations
+  Fractions
+  Decimals
+  Percentages
+  Ratios and proportions
+  Powers and roots
+  Scientific notation
+  Absolute value
+  Estimation and rounding
+  Exponentials
+  Logarithms
+   Logarithm laws
+   Natural logarithm
+   Change of base
+  Euler's formula
+ Number theory
+  Elementary number theory
+   Divisibility
+   Prime numbers
+   Fundamental theorem of arithmetic
+   GCD and LCM
+   Euclidean algorithm
+   Perfect numbers
+   Continued fractions
+  Modular arithmetic
+   Congruences
+   Chinese remainder theorem
+   Fermat's little theorem
+   Euler's theorem
+   Euler's totient function
+   Quadratic residues
+  Diophantine equations
+   Linear Diophantine equations
+   Pythagorean triples
+   Pell's equation
+   Fermat's last theorem
+  Analytic number theory
+   Prime number theorem
+   Riemann zeta function
+   Riemann hypothesis
+   Dirichlet's theorem
+  Algebraic number theory
+   Algebraic integers
+   Number fields
+   p-adic numbers
+  Number theory in cryptography
+   RSA
+   Discrete logarithm problem
+   Elliptic curve cryptography
+ Algebra
+  Elementary algebra
+   Variables and expressions
+   Linear equations
+   Simultaneous equations
+   Quadratic equations
+    Factorisation
+    Completing the square
+    Quadratic formula
+    Discriminant
+   Polynomials
+    Polynomial types
+    Polynomial division
+    Remainder and factor theorems
+    Roots of polynomials
+    Fundamental theorem of algebra
+   Inequalities
+   Equations and their graphs
+   Partial fractions
+   Binomial theorem
+  Functions
+   Functions and relations
+   Domain and range
+   Types of functions
+   Composite functions
+   Inverse functions
+   Transformations of graphs
+   Piecewise functions
+   Exponential functions
+   Logarithmic functions
+  Sequences and series
+   Arithmetic progressions
+   Geometric progressions
+   Geometric series
+   Sigma notation
+   Recursive sequences
+  Coordinate systems
+   Cartesian coordinates
+   Polar coordinates
+   Circular coordinates
+   Cylindrical coordinates
+   Spherical coordinates
+  Abstract algebra
+   Groups
+    Group axioms
+    Subgroups and cosets
+    Cyclic groups
+    Permutation groups
+    Symmetry groups
+    Lagrange's theorem
+    Normal subgroups
+    Quotient groups
+    Homomorphisms
+    Isomorphism theorems
+    Group actions
+    Sylow theorems
+    Lie groups
+   Rings
+    Ring axioms
+    Ideals
+    Integral domains
+    Polynomial rings
+    Quotient rings
+   Fields
+    Field extensions
+    Finite fields
+   Galois theory
+    Galois groups
+    Solvability by radicals
+   Modules
+   Lattices
+   Boolean algebra
+   Universal algebra
+  Representation theory
+   Group representations
+   Characters
+   Lie algebras
+  Homological algebra
+ Linear algebra
+  Vectors and vector spaces
+   Vector operations
+   Vector direction and magnitude
+   Vectors versus lines
+   Unit vectors
+   Cross product
+   Vector space axioms
+   Span and linear independence
+   Basis and dimension
+   Subspaces
+   Coordinates relative to a basis
+  Matrices
+   Matrix operations
+   Matrix multiplication
+   Transpose
+   Inverse and rank
+   Trace
+   Special matrices
+   Block matrices
+   Determinants
+   Geometric meaning of determinants
+  Systems of linear equations
+   Gaussian elimination
+   Row echelon form
+   Cramer's rule
+   Homogeneous systems
+   Least squares
+  Linear transformations
+   Kernel and image
+   Rank-nullity theorem
+   Change of basis
+   Projections
+   Rotations and reflections
+   Affine transformations
+  Inner product spaces
+   Dot product and norms
+   Orthogonality
+   Gram-Schmidt process
+   Orthogonal complements
+   Orthonormal bases
+  Eigenvalues and eigenvectors
+   Characteristic polynomial
+   Diagonalisation
+   Spectral theorem
+   Jordan normal form
+   Positive definite matrices
+   Quadratic forms
+  Matrix decompositions
+   LU decomposition
+   QR decomposition
+   Eigendecomposition
+   Singular value decomposition
+   Cholesky decomposition
+   Polar decomposition
+  Matrix exponential
+  Tensors
+   Tensor products
+   Index notation
+   Einstein summation
+ Calculus and analysis
+  Single-variable calculus
+   Limits and continuity
+   Limit laws
+   Limits at infinity
+   L'Hôpital's rule
+   Intermediate value theorem
+   Derivatives
+   Differentiation rules
+   Chain rule
+   Product and quotient rules
+   Implicit differentiation
+   Higher derivatives
+   Related rates
+   Optimisation problems
+   Curve sketching
+   Mean value theorem
+   Integrals
+   Riemann sums
+   Integral as an area function
+   Antiderivatives
+   Fundamental theorem of calculus
+   Integration by substitution
+   Integration by parts
+   Trigonometric substitution
+   Improper integrals
+   Area between curves
+   Volumes of revolution
+   Arc length
+   Taylor series
+   Maclaurin series
+   Taylor's theorem with remainder
+  Multivariable calculus
+   Functions of several variables
+   Partial derivatives
+   Directional derivatives
+   Gradient
+   Multivariable chain rule
+   Jacobian
+   Hessian
+   Multivariable Taylor expansion
+   Critical points and saddle points
+   Multiple integrals
+   Change of variables
+  Vector calculus
+   Vector fields
+   Divergence
+   Curl
+   Laplacian
+   Line and surface integrals
+   Green's theorem
+   Stokes and divergence theorems
+   Conservative fields and potentials
+  Real analysis
+   Completeness of the reals
+   Sequences and series
+   Cauchy sequences
+   Convergence
+   Uniform continuity
+   Uniform convergence
+   Riemann integration theory
+   Metric spaces
+   Compactness
+  Measure theory
+   Sigma-algebras
+   Lebesgue measure
+   Measurable functions
+   Lebesgue integration
+   Convergence theorems
+  Complex analysis
+   Complex numbers
+   Complex plane and Euler's formula
+   Analytic functions
+   Cauchy-Riemann equations
+   Contour integration
+   Cauchy's integral theorem
+   Laurent series
+   Residue theorem
+   Conformal mappings
+   Analytic continuation
+  Functional analysis
+   Normed spaces
+   Banach and Hilbert spaces
+   Operators
+   Spectral theory
+   Distributions
+  Fourier and integral transforms
+   Fourier series
+   Fourier transform
+   Discrete Fourier transform
+   Fast Fourier transform
+   Convolution
+   Laplace transform
+   Z-transform
+   Wavelets
+  Special functions
+   Gamma function
+   Bessel functions
+   Legendre polynomials
+   Error function
+ Differential equations
+  Ordinary differential equations
+   Classification of ODEs
+   First-order ODEs
+   Separable equations
+   Exact equations
+   Linear ODEs
+   Second-order linear ODEs
+   Characteristic equation
+   Variation of parameters
+   Systems of ODEs
+   Series solutions
+   Boundary value problems
+   Sturm-Liouville theory
+   Existence and uniqueness
+  Partial differential equations
+   Classification of PDEs
+   Heat equation
+   Wave equation
+   Laplace equation
+   Poisson equation
+   Advection equation
+   Reaction-diffusion equations
+   Separation of variables
+   Method of characteristics
+   Green's functions
+  Numerical solution of ODEs
+   Euler method
+   Runge-Kutta methods
+   Stiff equations
+   Adaptive step size
+  Delay differential equations
+  Integral equations
+ Dynamical systems
+  Phase space
+   State variables
+   Trajectories and flows
+   Phase portraits
+   Vector fields as dynamics
+   Autonomous and non-autonomous systems
+   Continuous and discrete time
+  One-dimensional flows
+   Fixed points on the line
+   Potentials
+  Two-dimensional flows
+   Nullclines
+   Classification of linear systems
+   Nodes, saddles, spirals and centres
+   Trace-determinant plane
+   Conservative systems
+   Index theory
+  Fixed points and stability
+   Linearisation
+   Jacobian at fixed points
+   Lyapunov functions
+   Lyapunov stability
+   Hartman-Grobman theorem
+   Stable and unstable manifolds
+   Centre manifolds
+   Basins of attraction
+   Separatrices
+   Multistability
+   Hysteresis
+   Attractor landscapes
+  Bifurcations
+   Saddle-node bifurcation
+   Transcritical bifurcation
+   Pitchfork bifurcation
+   Hopf bifurcation
+   Global bifurcations
+   Bifurcation diagrams
+   Catastrophe theory
+  Limit cycles and oscillators
+   Poincaré-Bendixson theorem
+   Relaxation oscillators
+   Van der Pol oscillator
+   Coupled oscillators
+   Synchronisation (Kuramoto model)
+  Chaos
+   Sensitive dependence
+   Lyapunov exponents
+   Lorenz system
+   Strange attractors
+   Fractal dimension
+   Period-doubling route to chaos
+   Feigenbaum constants
+  Discrete maps
+   Logistic map
+   Cobweb diagrams
+   Poincaré maps
+   Hénon map
+  Hamiltonian dynamics
+   Integrable systems
+   KAM theory
+  Ergodic theory
+   Invariant measures
+   Ergodicity
+   Mixing
+  Stochastic dynamics
+   Noise in dynamical systems
+   Stochastic differential equations
+   Langevin equation
+   Fokker-Planck equation
+   Noise-induced transitions
+   Kramers escape rate
+  Network dynamics
+  Applications of dynamical systems
+   Population dynamics
+   Epidemic models (SIR)
+   Neural dynamics
+   Epigenetic landscapes (Waddington)
+   Gene regulatory dynamics
+ Geometry
+  Euclidean geometry
+   Points, lines and planes
+   Angles
+   Triangle congruence
+   Triangle similarity
+   Pythagorean theorem
+   Circles
+   Polygons
+   Geometric constructions
+   Area and perimeter
+   Polyhedra
+   Volume and surface area
+  Analytic geometry
+   Equations of lines
+   Conic sections
+    Circle
+    Ellipse
+    Parabola
+    Hyperbola
+   Parametric curves
+   Polar curves
+  Trigonometry
+   Radians
+   Unit circle
+   Trigonometric functions
+   CAST rule
+   Trigonometric identities
+   Sine and cosine rules
+   Inverse trigonometric functions
+   Graphs of trigonometric functions
+   Hyperbolic functions
+   Waves and periodic functions
+    Sine wave basics
+    Amplitude, frequency and phase
+    Travelling waves
+    Standing waves
+    Superposition
+    Modulo and periodicity
+  Transformational geometry
+   Isometries
+   Symmetry
+   Tessellations
+  Non-Euclidean geometry
+   Parallel postulate
+   Spherical geometry
+   Hyperbolic geometry
+  Projective geometry
+  Higher-dimensional geometry
+   Hypercubes and tesseracts
+   Polytopes
+   Curse of dimensionality
+   Dimension and scale
+  Differential geometry
+   Curves and surfaces
+   Curvature
+   Frenet-Serret frame
+   Gaussian curvature
+   Manifolds
+   Tangent spaces
+   Differential forms
+   Riemannian geometry
+   Geodesics
+   Parallel transport
+   Curvature tensors
+  Algebraic geometry
+   Varieties
+   Elliptic curves
+  Origami and paper folding
+  Fractal geometry
+   Self-similarity
+   Mandelbrot set
+   Fractal dimension measures
+  Computational geometry
+   Convex hulls
+   Voronoi diagrams
+   Delaunay triangulation
+   Meshes
+  Convex geometry
+ Topology
+  Point-set topology
+   Open and closed sets
+   Topological spaces
+   Continuity in topology
+   Compactness and connectedness
+   Homeomorphisms
+  Algebraic topology
+   Fundamental group
+   Homotopy
+   Covering spaces
+   Homology
+   Cohomology
+   Euler characteristic
+  Surfaces
+   Torus
+   Möbius strip
+   Klein bottle
+   Classification of surfaces
+  Differential topology
+   Smooth manifolds
+   Morse theory
+  Topological data analysis
+   Simplicial complexes
+   Persistent homology
+   Mapper algorithm
+  Knot theory
+ Discrete mathematics
+  Combinatorics
+   Counting principles
+   Permutations and combinations
+   Binomial coefficients
+   Inclusion-exclusion
+   Pigeonhole principle
+   Generating functions
+   Catalan numbers
+   Integer partitions
+   Combinatorial designs
+  Graph theory
+   Graphs and networks
+   Graph representations
+   Paths and connectivity
+   Trees
+   Spanning trees
+   Eulerian and Hamiltonian paths
+   Planar graphs
+   Graph colouring
+   Matching
+   Network flows
+   Directed graphs
+   Network measures
+    Degree distribution
+    Centrality
+    Clustering coefficient
+   Random graphs
+   Small-world networks
+   Scale-free networks
+   Spectral graph theory
+  Recurrence relations
+  Order theory
+  Formal languages
+ Probability
+  Probability foundations
+   Sample spaces and events
+   Axioms of probability
+   Counting-based probability
+   Conditional probability
+   Bayes' theorem
+   Independence
+   Law of total probability
+   Geometric probability
+  Random variables
+   Discrete random variables
+   Continuous random variables
+   PMF, PDF and CDF
+   Expectation and variance
+   Moments
+   Moment generating functions
+   Characteristic functions
+   Joint distributions
+   Marginal and conditional distributions
+   Covariance and correlation
+   Transformations of random variables
+   Order statistics
+  Probability distributions
+   Bernoulli and binomial
+   Poisson distribution
+   Geometric distribution
+   Negative binomial distribution
+   Hypergeometric distribution
+   Uniform distribution
+   Normal distribution
+   Exponential distribution
+   Gamma and beta distributions
+   Chi-square distribution
+   Student's t distribution
+   F distribution
+   Log-normal distribution
+   Weibull distribution
+   Cauchy distribution
+   Multivariate normal
+   Multinomial distribution
+   Dirichlet distribution
+   Power-law distributions
+  Probability inequalities
+   Markov's inequality
+   Chebyshev's inequality
+   Jensen's inequality
+  Limit theorems
+   Law of large numbers
+   Central limit theorem
+   Modes of convergence
+  Stochastic processes
+   Random walks
+   Markov chains
+    Transition matrices
+    Stationary distributions
+    Absorbing chains
+   Continuous-time Markov chains
+   Poisson processes
+   Birth-death processes
+   Brownian motion
+   Martingales
+   Branching processes
+   Queueing theory
+   Gaussian processes
+   Itô calculus
+  Measure-theoretic probability
+ Statistics
+  Descriptive statistics
+   Data types and measurement scales
+   Measures of central tendency
+   Measures of spread
+   Quartiles and percentiles
+   Box and whisker plots
+   Histograms
+   Skewness and kurtosis
+   Data visualisation
+  Sampling
+   Sampling methods
+   Sampling distributions
+   Standard error
+   Sampling bias
+   Bootstrap
+  Estimation
+   Point estimation
+   Bias and variance of estimators
+   Method of moments
+   Maximum likelihood
+   Fisher information
+   Sufficiency
+   Confidence intervals
+  Hypothesis testing
+   Null and alternative hypotheses
+   p-values
+   Type I and II errors
+   Statistical power
+   Effect sizes
+   t-tests
+   Chi-square tests
+   ANOVA
+   Non-parametric tests
+   Permutation tests
+   Likelihood ratio tests
+   Multiple testing correction
+  Correlation
+   Pearson correlation
+   Spearman correlation
+   Correlation versus causation
+  Regression
+   Simple linear regression
+   Multiple regression
+   Residual analysis
+   Polynomial regression
+   Nonlinear regression
+   Logistic regression
+   Generalised linear models
+   Mixed-effects models
+   Regularisation (ridge, lasso)
+  Bayesian statistics
+   Priors and posteriors
+   Conjugate priors
+   Credible intervals
+   Hierarchical models
+   Markov chain Monte Carlo
+   Variational inference
+   Bayesian model comparison
+  Multivariate statistics
+   Covariance matrices
+   Dimensionality reduction
+    Principal component analysis
+    Factor analysis
+    Independent component analysis
+    Multidimensional scaling
+    t-SNE
+    UMAP
+   Clustering
+    k-means
+    Hierarchical clustering
+    Gaussian mixture models
+    DBSCAN
+   Discriminant analysis
+   Canonical correlation analysis
+   MANOVA
+  Time series
+   Trend and seasonality
+   Stationarity
+   Autocorrelation
+   Moving averages
+   ARIMA models
+   Spectral analysis
+   State-space models
+   Kalman filter
+  Survival analysis
+   Kaplan-Meier estimator
+   Cox proportional hazards
+  Causal inference
+   Randomised experiments
+   Confounding
+   Causal graphs
+   Instrumental variables
+   Difference-in-differences
+   Propensity scores
+  Experimental design
+   Randomisation
+   Blocking
+   Factorial designs
+   Power analysis
+  Statistical learning
+   Bias-variance trade-off
+   Cross-validation
+   Overfitting
+  Diagnostic test statistics
+   Sensitivity and specificity
+   ROC curves
+   Odds ratio and relative risk
+ Information theory
+  Entropy
+   Information content (surprisal)
+   Shannon entropy
+   Joint and conditional entropy
+   Mutual information
+   Kullback-Leibler divergence
+   Cross-entropy
+   Differential entropy
+   Entropy rate
+   Maximum entropy principle
+   Transfer entropy
+   Data processing inequality
+  Source coding
+   Kraft inequality
+   Huffman coding
+   Arithmetic coding
+   Lempel-Ziv compression
+   Compression limits
+  Channel capacity
+   Channel models
+   Noisy-channel coding theorem
+   Shannon-Hartley theorem
+   Error-correcting codes
+    Hamming codes
+    Reed-Solomon codes
+    LDPC codes
+  Algorithmic information
+   Kolmogorov complexity
+   Minimum description length
+  Information geometry
+   Fisher information metric
+  Rate-distortion theory
+  Information and thermodynamics
+   Landauer's principle
+   Maxwell's demon
+ Optimisation
+  Unconstrained optimisation
+   Gradient descent
+   Newton's method
+   Quasi-Newton methods
+   Line search
+  Constrained optimisation
+   Lagrange multipliers
+   KKT conditions
+   Penalty methods
+  Linear programming
+   Simplex method
+   Duality
+  Convex optimisation
+   Convex sets and functions
+   Interior point methods
+  Integer and combinatorial optimisation
+  Stochastic optimisation
+   Stochastic gradient descent
+   Simulated annealing
+   Genetic algorithms
+   Particle swarm optimisation
+  Multi-objective optimisation
+  Dynamic programming
+  Optimal control
+  Calculus of variations
+   Euler-Lagrange equation
+ Numerical methods
+  Floating-point arithmetic and error
+  Root finding
+   Bisection method
+   Newton-Raphson method
+  Numerical linear algebra
+   Iterative solvers
+   Conditioning and stability
+  Interpolation
+   Polynomial interpolation
+   Splines
+  Numerical differentiation
+  Numerical integration
+   Trapezoidal rule
+   Simpson's rule
+   Gaussian quadrature
+  Monte Carlo methods
+  Finite difference and finite element methods
+ Category theory
+  Categories and functors
+  Natural transformations
+  Universal properties
+  Products and coproducts
+  Limits and colimits
+  Adjunctions
+  Yoneda lemma
+  Monads
+  Monoidal categories
+  Topos theory
+  Applied category theory
+   Compositionality
+   Category theory in biology
+   Category theory in computer science
+ Game theory
+  Normal-form games
+  Extensive-form games
+  Dominant strategies
+  Nash equilibrium
+  Mixed strategies
+  Prisoner's dilemma
+  Repeated games
+  Evolutionary game theory
+   Evolutionarily stable strategies
+   Replicator dynamics
+  Cooperative games
+  Mechanism design
+  Auction theory
+ Mathematical modelling
+  Model building
+  Dimensional analysis
+  Scaling and non-dimensionalisation
+  Agent-based models
+  Population models
+  Compartmental models
+  Cellular automata
+  Model fitting and validation
+  Sensitivity analysis
+Physics
+ Foundations of physics
+  Physical quantities and units
+  SI system
+  Dimensional analysis in physics
+  Measurement and uncertainty
+  Scalars and vectors
+  Fundamental forces
+  Energy, mass and motion
+  Time and dimensions
+  History of physics
+  Unification in physics
+ Classical mechanics
+  Kinematics
+   Displacement, velocity and acceleration
+   Motion in one dimension
+   Equations of motion
+   Projectile motion
+   Circular motion
+   Relative motion
+   Reference frames
+  Newton's laws
+   First law and inertia
+   Second law
+   Third law
+   Free-body diagrams
+   Friction
+   Tension and normal forces
+   Non-inertial frames and fictitious forces
+  Work and energy
+   Work
+   Kinetic energy
+   Potential energy
+   Conservation of energy
+   Power
+   Work-energy theorem
+  Momentum and collisions
+   Linear momentum
+   Impulse
+   Conservation of momentum
+   Elastic collisions
+   Inelastic collisions
+   Centre of mass
+   Rocket propulsion
+  Rotational motion
+   Angular kinematics
+   Torque
+   Moment of inertia
+   Angular momentum
+   Conservation of angular momentum
+   Rolling motion
+   Gyroscopes and precession
+  Statics and equilibrium
+  Elasticity
+   Stress and strain
+   Hooke's law
+   Young's modulus
+  Oscillations
+   Simple harmonic motion
+   Pendulums
+   Damped oscillations
+   Driven oscillations and resonance
+   Coupled oscillators and normal modes
+  Gravitation
+   Newton's law of gravitation
+   Gravitational field and potential
+   Orbits and Kepler's laws
+   Escape velocity
+   Tides
+  Lagrangian mechanics
+   Generalised coordinates
+   Principle of least action
+   Euler-Lagrange equations
+   Noether's theorem
+  Hamiltonian mechanics
+   Hamilton's equations
+   Phase space in mechanics
+   Poisson brackets
+   Liouville's theorem
+   Canonical transformations
+  Rigid body dynamics
+  Central force motion
+  Classical chaos
+ Thermodynamics
+  Temperature and heat
+   Temperature scales
+   Thermal expansion
+   Heat capacity and specific heat
+   Latent heat
+  Heat transfer
+   Conduction
+   Convection
+   Radiation
+   Blackbody radiation
+  Laws of thermodynamics
+   Zeroth law
+   First law
+   Second law
+   Third law
+  Thermodynamic processes
+   Isothermal processes
+   Adiabatic processes
+   Isobaric and isochoric processes
+   Reversible and irreversible processes
+  Thermodynamic entropy
+  Free energy
+   Gibbs free energy
+   Helmholtz free energy
+   Enthalpy
+   Chemical potential
+  Thermodynamic potentials and Maxwell relations
+  Heat engines
+   Carnot cycle
+   Efficiency
+   Refrigerators and heat pumps
+   Otto and Diesel cycles
+  Ideal and real gases
+   Ideal gas law
+   Van der Waals equation
+  Phase transitions
+   Phase diagrams
+   Clausius-Clapeyron equation
+   Critical points
+  Non-equilibrium thermodynamics
+   Entropy production
+   Onsager relations
+   Dissipative structures
+   Fluctuation theorems
+   Thermodynamics of living systems
+ Statistical mechanics
+  Microstates and macrostates
+  Boltzmann entropy
+  Boltzmann distribution
+  Partition functions
+  Ensembles
+   Microcanonical ensemble
+   Canonical ensemble
+   Grand canonical ensemble
+  Equipartition theorem
+  Maxwell-Boltzmann distribution
+  Quantum statistics
+   Fermi-Dirac statistics
+   Bose-Einstein statistics
+  Ising model
+  Mean-field theory
+  Critical phenomena
+   Order parameters
+   Critical exponents
+   Universality
+   Renormalisation group
+  Kinetic theory of gases
+  Fluctuations and response
+  Brownian motion in physics
+  Diffusion
+ Electromagnetism
+  Electrostatics
+   Electric charge
+   Coulomb's law
+   Electric field
+   Gauss's law
+   Electric potential
+   Capacitance
+   Dielectrics
+  Electric circuits
+   Current and resistance
+   Ohm's law
+   Kirchhoff's laws
+   Series and parallel circuits
+   RC circuits
+   RL and LC circuits
+   AC circuits
+   Impedance
+   Power in circuits
+  Magnetism
+   Magnetic fields
+   Lorentz force
+   Biot-Savart law
+   Ampère's law
+   Magnetic materials
+   Ferromagnetism
+   Magnetic dipoles
+  Electromagnetic induction
+   Faraday's law
+   Lenz's law
+   Inductance
+   Transformers
+   Generators and motors
+  Maxwell's equations
+  Electromagnetic waves
+   Wave equation for light
+   Electromagnetic spectrum
+   Energy and momentum of waves
+   Radiation from accelerating charges
+  Electromagnetism in matter
+ Waves and optics
+  Wave properties
+   Wavelength, frequency and speed
+   Transverse and longitudinal waves
+   Superposition and interference
+   Standing waves in physics
+   Doppler effect
+   Dispersion
+  Sound
+   Speed of sound
+   Intensity and decibels
+   Resonance in pipes and strings
+   Harmonics and timbre
+   Acoustics
+   Ultrasound
+  Geometric optics
+   Reflection
+   Refraction and Snell's law
+   Total internal reflection
+   Lenses
+   Mirrors
+   Optical instruments
+   The eye as an optical system
+  Wave optics
+   Interference and diffraction
+   Young's double slit
+   Diffraction gratings
+   Polarisation
+   Thin-film interference
+  Lasers
+  Fibre optics
+  Holography
+ Fluid dynamics
+  Fluid statics
+   Pressure
+   Pascal's principle
+   Buoyancy and Archimedes' principle
+  Fluid kinematics
+   Streamlines
+   Continuity equation
+  Bernoulli's principle
+  Viscosity
+  Navier-Stokes equations
+  Reynolds number
+  Laminar and turbulent flow
+  Turbulence
+  Low Reynolds number flow
+  Boundary layers
+  Drag and lift
+  Surface tension and capillarity
+  Compressible flow
+  Biofluid dynamics
+ Relativity
+  Special relativity
+   Postulates of special relativity
+   Time dilation
+   Length contraction
+   Lorentz transformations
+   Relativity of simultaneity
+   Spacetime and Minkowski diagrams
+   Mass-energy equivalence
+   Relativistic momentum
+  General relativity
+   Equivalence principle
+   Curved spacetime
+   Einstein field equations
+   Schwarzschild solution
+   Gravitational time dilation
+   Gravitational lensing
+   Gravitational waves
+   Black holes
+ Quantum mechanics
+  Origins of quantum theory
+   Blackbody problem and Planck
+   Photoelectric effect
+   Bohr model
+   De Broglie wavelength
+  Wave-particle duality
+  Schrödinger equation
+   Time-dependent equation
+   Time-independent equation
+   Particle in a box
+   Finite potential well
+  Wavefunction and probability
+  Uncertainty principle
+  Operators and observables
+  Dirac notation
+  Superposition and measurement
+  Quantum harmonic oscillator
+  Quantum tunnelling
+  Hydrogen atom
+  Angular momentum in quantum mechanics
+  Spin
+  Pauli exclusion principle
+  Identical particles
+  Perturbation theory
+  Entanglement
+  Bell's theorem
+  Decoherence
+  Interpretations of quantum mechanics
+  Quantum information
+   Qubits
+   Quantum gates
+   Quantum computing
+   Quantum cryptography
+  Quantum field theory basics
+ Atomic and molecular physics
+  Atomic structure
+  Atomic spectra
+  Electron configuration in physics
+  X-rays
+  Molecular physics
+ Nuclear physics
+  Nuclear structure
+  Binding energy
+  Radioactivity
+   Alpha decay
+   Beta decay
+   Gamma decay
+   Half-life
+  Nuclear reactions
+  Nuclear fission
+  Nuclear fusion
+  Radiation and matter
+ Particle physics
+  Elementary particles
+  Quarks and leptons
+  Hadrons
+  Antimatter
+  Standard model
+  Gauge bosons
+  Higgs mechanism
+  Conservation laws and symmetries
+  Neutrinos
+  Particle accelerators and detectors
+  Beyond the standard model
+ Condensed matter physics
+  Crystal structure
+  Band theory
+  Semiconductors
+  Superconductivity
+  Magnetism in solids
+  Phonons
+  Soft matter
+  Liquid crystals
+ Energy
+  Forms of energy
+  Energy conversion
+  Energy storage
+  Power generation
+  Renewable energy physics
+ Biophysics
+  Molecular motors
+  Membrane biophysics
+  Physics of protein folding
+  Diffusion in cells
+  Bioelectricity
+  Mechanobiology
+ Complex systems
+  Emergence
+  Self-organisation
+  Complex networks
+  Scaling laws
+  Self-organised criticality
+  Pattern formation
+ Astrophysics and cosmology
+  Solar system physics
+  Stellar physics
+   Nebulae and star formation
+   Stellar structure
+   Hertzsprung-Russell diagram
+   Stellar evolution
+   White dwarfs
+   Neutron stars
+   Supernovae
+  Black holes in astrophysics
+  Galaxies
+   Galaxy types
+   The Milky Way
+   Galaxy clusters and superclusters
+  Cosmology
+   Big Bang
+   Cosmic microwave background
+   Hubble's law and expansion
+   Lambda-CDM model
+   Dark matter
+   Dark energy
+   Inflation
+   Large-scale structure
+  Magnetospheres and radiation belts
+  Exoplanets
+Chemistry
+ General chemistry
+  Matter and its properties
+  Atomic structure
+   Subatomic particles
+   Isotopes
+   Electron configuration
+   Orbitals
+   Quantum numbers
+  Periodic table
+   Periodic trends
+   Groups and periods
+   Element-wise properties
+  Chemical bonding
+   Ionic bonding
+   Covalent bonding
+   Metallic bonding
+   Hydrogen bonding
+   Van der Waals forces
+   Electronegativity and polarity
+   Lewis structures
+   VSEPR theory
+   Hybridisation
+   Molecular orbital theory
+  Stoichiometry
+   The mole
+   Balancing equations
+   Limiting reagents
+   Percent yield
+  States of matter
+   Gases
+   Liquids
+   Solids
+   Intermolecular forces
+  Solutions
+   Concentration
+   Solubility
+   Colligative properties
+   Osmosis in chemistry
+  Acids and bases
+   Arrhenius, Brønsted-Lowry and Lewis definitions
+   pH and pOH
+   Strong and weak acids
+   Buffers
+   Titration curves
+   Henderson-Hasselbalch equation
+  Redox reactions
+   Oxidation states
+   Balancing redox equations
+ Physical chemistry
+  Chemical thermodynamics
+   Enthalpy of reaction
+   Hess's law
+   Entropy in chemistry
+   Gibbs energy and spontaneity
+  Chemical kinetics
+   Rate laws
+   Reaction order
+   Activation energy
+   Arrhenius equation
+   Reaction mechanisms
+   Catalysis
+   Collision theory
+   Transition state theory
+  Chemical equilibrium
+   Equilibrium constant
+   Le Chatelier's principle
+   Solubility equilibria
+  Electrochemistry
+   Galvanic cells
+   Electrode potentials
+   Nernst equation
+   Electrolysis
+   Batteries
+   Corrosion
+  Quantum chemistry
+   Schrödinger equation for atoms
+   Molecular orbitals
+   Density functional theory
+  Spectroscopy
+   UV-visible spectroscopy
+   Infrared spectroscopy
+   NMR spectroscopy
+   Fluorescence
+  Surface chemistry
+  Colloids
+ Organic chemistry
+  Structure of organic molecules
+  Nomenclature
+  Functional groups
+   Alkanes
+   Alkenes
+   Alkynes
+   Alcohols
+   Ethers
+   Aldehydes and ketones
+   Carboxylic acids
+   Esters
+   Amines
+   Amides
+   Halides
+  Isomerism
+  Stereochemistry
+   Chirality
+   Enantiomers and diastereomers
+   Optical activity
+  Organic reaction mechanisms
+   Nucleophilic substitution
+   Elimination
+   Electrophilic addition
+   Electrophilic aromatic substitution
+   Nucleophilic addition
+   Radical reactions
+  Aromatic chemistry
+  Organic synthesis
+  Polymers
+   Addition polymers
+   Condensation polymers
+   Biopolymers
+ Inorganic chemistry
+  Main group chemistry
+  Transition metals
+  Coordination chemistry
+   Ligands
+   Crystal field theory
+  Organometallic chemistry
+  Solid-state chemistry
+  Bioinorganic chemistry
+ Nuclear chemistry
+  Radioactive decay in chemistry
+  Radioisotopes
+  Nuclear medicine chemistry
+ Structural chemistry
+  Crystal structures
+  X-ray crystallography
+  Molecular geometry
+ Biochemistry
+  Water and biomolecules
+  Amino acids and proteins
+   Amino acid properties
+   Peptide bonds
+   Protein structure
+   Protein folding
+   Protein-protein interactions
+  Enzymes
+   Enzyme kinetics (Michaelis-Menten)
+   Enzyme inhibition
+   Enzyme regulation
+   Allostery
+   Cofactors and coenzymes
+  Carbohydrates
+  Lipids and membranes
+  Nucleic acids
+  Vitamins
+  Metabolism
+   Glycolysis
+   Gluconeogenesis
+   Pentose phosphate pathway
+   Krebs cycle
+   Electron transport chain
+   Oxidative phosphorylation
+   ATP synthase
+   Glycogen metabolism
+   Fatty acid metabolism
+   Amino acid metabolism
+   Urea cycle
+   Nucleotide metabolism
+   Metabolic regulation
+   Photosynthesis
+  Bioenergetics
+   ATP as energy currency
+   Redox potentials in biology
+   Chemiosmosis
+ Analytical chemistry
+  Titration
+  Gravimetric analysis
+  Chromatography
+   Thin-layer chromatography
+   Gas chromatography
+   HPLC
+  Mass spectrometry
+  Electrophoresis
+  Quality control in the laboratory
+ Computational chemistry
+  Molecular dynamics
+  Molecular docking
+  Force fields
+  Cheminformatics
+ Environmental chemistry
+ Materials chemistry
+ Food chemistry
+  Food components
+  Food additives
+  Food preservation chemistry
+Biology
+ Foundations of biology
+  Characteristics of life
+  Levels of biological organisation
+  Cell theory
+  Classification of life
+  History of biology
+ Cell biology
+  Cell structure
+   Prokaryotic cells
+   Eukaryotic cells
+   Cell size and scaling
+  Membranes and transport
+   Lipid bilayer
+   Membrane proteins
+   Passive transport
+   Active transport
+   Ion channels
+   Endocytosis and exocytosis
+   Membrane potential
+  Organelles
+   Nucleus
+   Endoplasmic reticulum
+   Golgi apparatus
+   Mitochondria
+   Chloroplasts
+   Lysosomes and peroxisomes
+  Cytoskeleton
+   Actin filaments
+   Microtubules
+   Intermediate filaments
+   Motor proteins
+  Cell cycle
+   Interphase
+   Mitosis
+   Meiosis
+   Cell cycle checkpoints
+   Cyclins and CDKs
+  Cell signalling
+   Receptors
+   G protein-coupled receptors
+   Receptor tyrosine kinases
+   Second messengers
+   Signal transduction pathways
+   Signal amplification and feedback
+   Paracrine, endocrine and autocrine signalling
+  Cell adhesion and extracellular matrix
+  Protein trafficking and sorting
+  Autophagy
+  Apoptosis
+  Cell senescence
+ Molecular biology
+  Central dogma
+  DNA structure
+  Chromatin organisation
+  DNA replication
+  DNA repair
+  Transcription
+   RNA polymerase
+   Promoters and enhancers
+   Transcription factors
+  RNA processing
+   Splicing
+   Alternative splicing
+  Translation
+   Genetic code
+   Ribosomes
+   tRNA
+  Post-translational modification
+  Gene regulation
+   Operons
+   Eukaryotic gene regulation
+   Non-coding RNAs
+   RNA interference
+  Epigenetics
+   DNA methylation
+   Histone modification
+   Genomic imprinting
+   Epigenetic inheritance
+  Molecular techniques
+   PCR
+   Gel electrophoresis
+   Cloning and vectors
+   Sequencing
+   Next-generation sequencing
+   CRISPR
+   Western blotting
+   ELISA
+   Flow cytometry
+   Microscopy techniques
+ Genetics
+  Mendelian genetics
+   Dominance and recessiveness
+   Segregation and independent assortment
+   Punnett squares
+   Pedigree analysis
+  Non-Mendelian inheritance
+   Incomplete dominance and codominance
+   Linkage
+   Sex-linked inheritance
+   Mitochondrial inheritance
+   Polygenic traits
+  Chromosomes
+   Karyotypes
+   Chromosomal abnormalities
+  Mutation
+   Point mutations
+   Insertions and deletions
+   Mutation rates
+  Recombination
+  Quantitative genetics
+   Heritability
+   Genotype-phenotype mapping
+   QTL mapping
+   GWAS
+  Population genetics
+   Allele frequencies
+   Hardy-Weinberg equilibrium
+   Genetic drift
+   Gene flow
+   Selection
+   Mutation-selection balance
+   Heterozygosity
+   Effective population size
+   Fixation probability
+   Coalescent theory
+   Wright-Fisher model
+   Moran model
+   Linkage disequilibrium
+  Human genetics
+  Genetic engineering
+ Evolutionary biology
+  History of evolutionary thought
+  Natural selection
+   Directional, stabilising and disruptive selection
+   Sexual selection
+   Kin selection
+   Group and multilevel selection
+  Fitness landscapes
+  Adaptation
+  Speciation
+  Phylogenetics
+   Tree of life
+   Cladistics
+   Molecular clocks
+  Molecular evolution
+   Neutral theory
+   Gene duplication
+  Evolutionary developmental biology
+  Coevolution
+  Evolution of cooperation
+  Major transitions in evolution
+  Origin of life
+   Prebiotic chemistry
+   RNA world
+   Origin of cells
+  Human evolution
+  Extinction
+ Immunology
+  Overview of the immune system
+  Innate immunity
+   Physical barriers
+   Phagocytes
+   Pattern recognition receptors
+   Complement system
+   Inflammation
+   Natural killer cells
+   Dendritic cells
+  Adaptive immunity
+   Clonal selection
+   Primary and secondary responses
+  T cells
+   T-cell receptor structure
+   V(D)J recombination
+   Thymic selection
+   MHC and antigen presentation
+   T-cell activation
+   Co-stimulation
+   CD4 helper T cells
+   CD8 cytotoxic T cells
+   Regulatory T cells
+   T-cell exhaustion
+   TCR specificity and cross-reactivity
+  B cells and antibodies
+   Antibody structure
+   Antibody classes
+   Somatic hypermutation
+   Class switching
+   Germinal centres
+  Immune repertoire
+   Repertoire diversity
+   Repertoire sequencing
+   Shape space models
+  Immunological memory
+  Cytokines
+  Immune tolerance
+  Mucosal immunity
+  Immunopathology
+   Hypersensitivity
+   Autoimmunity
+   Immunodeficiency
+  Tumour immunology
+  Transplant immunology
+  Vaccines
+  Systems and computational immunology
+ Microbiology
+  Microbial diversity
+  Bacteria
+   Bacterial structure
+   Bacterial growth
+   Bacterial genetics
+   Gram staining
+   Biofilms
+   Quorum sensing
+  Archaea
+  Viruses
+   Virus structure
+   Viral replication
+   Bacteriophages
+   Retroviruses
+   Viral evolution
+  Fungi
+  Protists and parasites
+  Microbial growth
+   Growth curves
+   Growth kinetics
+  Microbial metabolism
+  Antimicrobials and resistance
+  Host-pathogen interactions
+  Microbiome
+  Food microbiology
+   Foodborne pathogens
+    Salmonella
+    Listeria
+    Campylobacter
+    E. coli
+   Indicator organisms
+   Spoilage organisms
+   Microbiological testing
+   Sampling plans
+   Environmental monitoring
+ Physiology
+  Homeostasis
+  Cardiovascular physiology
+   Cardiac cycle
+   Cardiac electrophysiology
+   Blood pressure regulation
+   Haemodynamics
+  Respiratory physiology
+   Ventilation mechanics
+   Gas exchange
+   Oxygen transport
+   Control of breathing
+  Renal physiology
+   Glomerular filtration
+   Tubular transport
+   Acid-base balance
+   Fluid and electrolyte balance
+  Endocrine physiology
+   Hormone signalling
+   Hypothalamic-pituitary axis
+   Thyroid
+   Adrenal
+   Pancreatic hormones
+   Reproductive hormones
+  Nervous system physiology
+  Musculoskeletal physiology
+   Muscle contraction
+   Bone physiology
+  Digestive physiology
+  Blood physiology
+  Reproductive physiology
+  Exercise physiology
+  Circadian rhythms
+ Neuroscience
+  Neuroanatomy
+  Neurons and synapses
+  Glial cells
+  Action potential
+  Synaptic transmission
+  Neurotransmitters
+  Synaptic plasticity
+  Sensory systems
+  Motor systems
+  Neural circuits
+  Neural development
+  Neural basis of learning and memory
+  Neuroendocrinology
+  Sleep neuroscience
+  Computational neuroscience
+   Neuron models
+   Neural coding
+   Neural networks in the brain
+ Developmental biology
+  Fertilisation
+  Embryogenesis
+  Gastrulation
+  Morphogenesis
+  Morphogen gradients
+  Cell differentiation
+  Stem cells
+  Regeneration
+  Ageing
+ Plant biology
+  Plant structure
+  Photosynthesis in plants
+  Plant growth and hormones
+  Plant reproduction
+  Soil and plant nutrition
+ Ecology
+  Population ecology
+  Community ecology
+  Predator-prey dynamics
+  Ecosystems
+  Energy flow and food webs
+  Biogeochemical cycles
+  Biodiversity
+  Conservation biology
+ Systems biology
+  Network motifs
+  Gene regulatory networks
+  Metabolic networks
+  Signalling networks
+  Biological oscillators
+  Robustness and noise in biology
+  Synthetic biology
+ Bioinformatics
+  Biological databases
+  Sequence alignment
+  Phylogenetic inference
+  Structural bioinformatics
+  Protein structure prediction
+  Protein encoding (Atchley factors)
+  Genomics
+  Transcriptomics
+  Proteomics
+  Single-cell analysis
+ Anatomy
+  Anatomical terminology
+  Gross anatomy
+   Upper limb
+   Lower limb
+   Thorax
+   Abdomen
+   Pelvis
+   Head and neck
+   Neuroanatomy overview
+  Histology
+   Epithelial tissue
+   Connective tissue
+   Muscle tissue
+   Nervous tissue
+  Embryology
+Medicine
+ Clinical foundations
+  History taking
+  Clinical examination
+  Clinical reasoning
+  Evidence-based medicine
+  Medical ethics
+  Communication skills
+ Pathology
+  General pathology
+   Cell injury and death
+   Inflammation and repair
+   Haemodynamic disorders
+   Neoplasia
+   Genetic disorders
+  Systemic pathology
+  Clinical chemistry
+  Haematopathology
+ Pharmacology
+  Pharmacokinetics
+  Pharmacodynamics
+  Drug interactions
+  Adverse drug reactions
+  Autonomic pharmacology
+  Cardiovascular drugs
+  Antimicrobial drugs
+  CNS drugs
+  Endocrine drugs
+  Anticancer drugs
+  Analgesics
+  Drug discovery and development
+ Internal medicine
+  Cardiology
+   Ischaemic heart disease
+   Heart failure
+   Arrhythmias
+   Hypertension
+   Valvular heart disease
+   Cardiomyopathies
+   ECG interpretation
+  Pulmonology
+   Asthma
+   COPD
+   Pneumonia
+   Tuberculosis
+   Interstitial lung disease
+   Pulmonary embolism
+   Respiratory failure
+  Gastroenterology
+   Peptic ulcer disease
+   Inflammatory bowel disease
+   Liver disease
+   Pancreatitis
+   GI bleeding
+  Nephrology
+   Acute kidney injury
+   Chronic kidney disease
+   Glomerular disease
+   Electrolyte disorders
+   Dialysis
+  Endocrinology
+   Diabetes mellitus
+   Thyroid disorders
+   Adrenal disorders
+   Pituitary disorders
+   Bone and calcium disorders
+  Neurology
+   Stroke
+   Epilepsy
+   Headache
+   Neurodegenerative disease
+   Multiple sclerosis
+   Peripheral neuropathy
+  Haematology
+   Anaemias
+   Haemostasis and coagulation
+   Leukaemias
+   Lymphomas
+   Transfusion medicine
+  Infectious diseases
+   Sepsis
+   HIV
+   Malaria
+   Viral hepatitis
+   Hospital-acquired infections
+   Tropical diseases
+  Rheumatology
+   Rheumatoid arthritis
+   Lupus
+   Gout
+   Vasculitis
+  Oncology
+   Cancer biology
+   Cancer staging
+   Chemotherapy principles
+   Immunotherapy
+  Geriatrics
+  Emergency medicine
+  Critical care
+ Surgery
+  Principles of surgery
+  Wound healing and care
+  Fluid and electrolyte management
+  Surgical infections
+  General surgery
+   Acute abdomen
+   Hernias
+   Hepatobiliary surgery
+   Colorectal surgery
+   Breast surgery
+  Trauma
+  Vascular surgery
+  Cardiothoracic surgery
+  Neurosurgery
+  Urology
+  Plastic surgery
+  Surgical oncology
+ Orthopaedics
+  Fractures
+  Joint disorders
+  Spine
+  Sports injuries
+  Bone infections
+  Paediatric orthopaedics
+ Paediatrics
+  Growth and development
+  Neonatology
+  Paediatric infections
+  Immunisation
+  Paediatric nutrition
+  Congenital disorders
+ Obstetrics and gynaecology
+  Obstetrics
+   Antenatal care
+   Normal labour
+   Complications of pregnancy
+   Postpartum care
+  Gynaecology
+   Menstrual disorders
+   Infertility
+   Gynaecological oncology
+   Contraception
+ Anaesthesia
+  Airway management
+  General anaesthesia
+  Regional anaesthesia
+  Pain management
+ Dentistry
+ Dermatology
+  Skin structure and function
+  Inflammatory skin disease
+  Skin infections
+  Skin cancer
+ ENT
+  Ear disorders
+  Nose and sinus disorders
+  Throat disorders
+ Ophthalmology
+  Refractive errors
+  Cataract
+  Glaucoma
+  Retinal disease
+ Psychiatry
+  Psychiatric assessment
+  Mood disorders
+  Psychotic disorders
+  Anxiety disorders
+  Personality disorders
+  Substance use disorders
+  Neurodevelopmental disorders
+  Psychopharmacology
+  Psychotherapies
+ Radiology
+  X-ray imaging
+  CT
+  MRI
+  Ultrasound imaging
+  Nuclear medicine imaging
+ Forensic and community medicine
+  Forensic medicine
+  Toxicology
+  Epidemiology
+   Study designs
+   Measures of disease frequency
+   Bias and confounding in studies
+   Screening
+  Public health
+  Biostatistics in medicine
+  Nutrition
+  Occupational health
+  Environmental health
+ Medical genetics
+  Genetic counselling
+  Inherited disorders
+  Genomic medicine
+ Health systems and management
+  Healthcare systems
+   Private healthcare (US)
+   Public healthcare (UK NHS)
+   Health insurance
+  Hospital management
+  Hospital logistics
+  Pharmaceutical industry
+  Health economics
+  Healthcare quality and safety
+  Digital health
+Computer science
+ Computer hardware
+  Digital logic
+   Logic gates
+   Boolean circuits
+   Combinational logic
+   Sequential logic
+   Flip-flops and registers
+  Computer architecture
+   Von Neumann architecture
+   CPU structure
+   Instruction sets
+   Pipelining
+   Memory hierarchy
+   Caches
+   GPUs and parallel hardware
+  Storage devices
+  Input and output devices
+  Embedded systems
+  PC building and components
+ Programming
+  Programming fundamentals
+   Variables and types
+   Control flow
+   Functions
+   Scope
+   Recursion in programming
+   Error handling
+  Programming paradigms
+   Imperative programming
+   Object-oriented programming
+   Functional programming
+   Event-driven programming
+   Declarative programming
+  Python
+   Python syntax and data types
+   Python data structures
+   Python functions and modules
+   Python classes
+   NumPy
+   pandas
+   Matplotlib
+   SciPy
+  JavaScript
+   JavaScript syntax
+   DOM manipulation
+   Asynchronous JavaScript
+   Modules and bundling
+  Other languages
+   C and C++
+   Java
+   SQL as a language
+   Bash and shell scripting
+  Compilers and interpreters
+  Memory management
+  Concurrency and parallelism
+ Algorithms
+  Complexity and Big-O
+  Searching
+   Linear search
+   Binary search
+  Sorting
+   Bubble, insertion and selection sort
+   Merge sort
+   Quicksort
+   Heap sort
+  Recursion and divide-and-conquer
+  Greedy algorithms
+  Dynamic programming algorithms
+  Graph algorithms
+   Breadth-first search
+   Depth-first search
+   Dijkstra's algorithm
+   Minimum spanning trees
+   Topological sort
+  String algorithms
+  Randomised algorithms
+  Approximation algorithms
+ Data structures
+  Arrays and lists
+  Stacks and queues
+  Hash tables
+  Trees
+   Binary search trees
+   Balanced trees
+   Heaps
+   Tries
+  Graphs as data structures
+  Spatial data structures
+ Theory of computation
+  Automata
+  Regular languages
+  Context-free grammars
+  Turing machines
+  Complexity classes
+  P versus NP
+ Software engineering
+  Software development life cycle
+  Requirements and design
+  Version control
+   Git
+  Testing
+  Debugging
+  Software architecture
+  Design patterns
+  Code quality and refactoring
+  Documentation
+  Agile methods
+ Web development
+  How the web works
+  HTML and CSS
+  Responsive design
+  Front-end frameworks
+  Progressive web apps
+  Backend and APIs
+  REST APIs
+  Authentication
+  Web performance
+ Database management
+  Database concepts
+  Relational databases
+  SQL queries
+  Normalisation
+  Transactions
+  Document databases
+  Firebase and Firestore
+  Data modelling
+ Operating systems
+  Processes and threads
+  Scheduling
+  Memory management in operating systems
+  File systems
+  Windows
+  Linux
+ Networking
+  Network models (OSI and TCP/IP)
+  Physical and data link layers
+  Ethernet and switching
+  IP addressing and subnetting
+  Routing
+   Static routing
+   OSPF
+  TCP and UDP
+  DNS and DHCP
+  Wireless networking
+  VLANs
+  Network services
+  Network automation
+  CCNA topics
+ Cybersecurity
+  Security principles
+  Threats and attacks
+  Cryptography
+   Symmetric encryption
+   Public-key cryptography
+   Hash functions
+   Digital signatures
+  Network security
+  Web security
+  Authentication and access control
+  Malware
+  Security operations
+ Distributed systems
+  Client-server model
+  Cloud computing
+  Consistency and replication
+  Synchronisation and sync conflicts
+ Machine learning
+  Foundations of machine learning
+   Learning from data
+   Loss functions
+   Generalisation
+   Feature engineering
+  Supervised learning
+   Linear models
+   Decision trees
+   Random forests
+   Gradient boosting
+   Support vector machines
+   k-nearest neighbours
+  Unsupervised learning
+   Clustering in machine learning
+   Dimensionality reduction in machine learning
+   Density estimation
+  Neural networks
+   Perceptrons
+   Activation functions
+   Backpropagation
+   Optimisers
+   Regularisation in neural networks
+   Convolutional networks
+   Recurrent networks
+   Transformers
+   Attention mechanisms
+   Embeddings
+   Autoencoders
+   Generative models
+   Diffusion models
+  Large language models
+  Speech and audio
+   Speech synthesis
+   Speech recognition
+   Voice models
+  Reinforcement learning
+   Markov decision processes
+   Q-learning
+   Policy gradients
+  Model evaluation
+  ML in biology
+  AI safety and ethics
+ Artificial intelligence
+  Search and planning
+  Knowledge representation
+  Agents
+ Computer graphics
+  Rendering
+   Rasterisation
+   Ray tracing
+  Shaders
+  3D modelling
+  Geometry nodes
+  Procedural generation
+  Animation
+   Keyframe animation
+   Physics simulation in graphics
+  Colour in computing
+ Scientific computing
+  Simulation
+  Agent-based simulation
+  Numerical libraries
+  Scientific visualisation
+  Mathematical animation (Manim)
+  Molecular visualisation
+  High-performance computing
+ Human-computer interaction
+  User interface design
+  Usability
+  Accessibility
+ Productivity software
+  Spreadsheets
+   Spreadsheet formulas
+   Macros and VBA
+   Spreadsheet shortcuts
+  Word processing
+  Presentation software
+ Data science
+  Data cleaning
+  Exploratory data analysis
+  Data pipelines
+  Dashboards
+Psychology
+ Foundations of psychology
+  History of psychology
+  Schools of thought
+  Research methods
+   Experimental methods
+   Correlational studies
+   Psychometrics
+ Cognitive psychology
+  Perception
+  Attention
+  Memory
+   Working memory
+   Long-term memory
+   Forgetting
+  Language
+  Thinking and reasoning
+  Decision making
+  Problem solving
+  Creativity
+  Cognitive biases
+ Learning
+  Classical conditioning
+  Operant conditioning
+  Observational learning
+  Skill acquisition
+   Stages of skill learning
+   Motor learning
+   Procedural memory
+  Deliberate practice
+  Spaced repetition
+  Metacognition
+  Self-directed learning
+  Expertise
+ Developmental psychology
+  Infancy and childhood
+  Piaget's stages
+  Attachment theory
+  Adolescence
+  Adult development
+ Social psychology
+  Social cognition
+  Attitudes and persuasion
+  Conformity and obedience
+  Group dynamics
+  Interpersonal attraction
+  Prejudice
+ Personality
+  Trait theories
+  Psychodynamic theories
+  Humanistic theories
+  Personality assessment
+ Motivation and emotion
+  Theories of motivation
+  Intrinsic and extrinsic motivation
+  Emotions
+  Stress and coping
+  Flow
+ Consciousness
+  Sleep and dreams
+  The unconscious and subconscious
+  Altered states
+  Theories of consciousness
+ Biological psychology
+  Brain and behaviour
+  Neurotransmitters and behaviour
+  Hormones and behaviour
+ Clinical psychology
+  Psychopathology
+  Assessment and diagnosis
+  Psychotherapy approaches
+ Positive psychology
+  Wellbeing
+  Meaning and purpose
+  Resilience
+ Applied psychology
+  Organisational psychology
+  Educational psychology
+  Health psychology
+ Evolutionary psychology
+ Computational models of mind
+ Established models and frameworks
+ Symmetry and pattern in mind
+Economics
+ Foundations of economics
+  Scarcity and choice
+  Opportunity cost
+  Economic systems
+  Incentives
+ Microeconomics
+  Supply and demand
+  Elasticity
+  Consumer theory
+   Utility
+   Indifference curves
+  Producer theory
+   Production functions
+   Costs
+  Market structures
+   Perfect competition
+   Monopoly
+   Oligopoly
+   Monopolistic competition
+  Market failure
+   Externalities
+   Public goods
+   Information asymmetry
+  Labour markets
+  Welfare economics
+ Macroeconomics
+  GDP and national accounts
+  Economic growth
+  Unemployment
+  Inflation
+  Money and money supply
+  Central banking
+  Monetary policy
+  Fiscal policy
+  Government debt
+  Business cycles
+  Aggregate demand and supply
+ Government economics
+  Public finance
+  Government spending
+  Taxation
+   Tax systems
+   Income tax
+   Corporate tax
+   VAT
+   UK tax system
+  Welfare state
+ International economics
+  International trade
+  Comparative advantage
+  Exchange rates
+  Balance of payments
+  Globalisation
+  International banking
+ Accounting
+  Accounting principles
+  Double-entry bookkeeping
+  Financial statements
+   Income statement
+   Balance sheet
+   Cash flow statement
+   Notes to the accounts
+  Financial ratio analysis
+  Sector-specific statements
+   Banks and financial institutions
+   Insurance companies
+   Manufacturing companies
+   Technology companies
+  Management accounting
+  Auditing
+ Finance
+  Time value of money
+  Interest and compounding
+  Discounted cash flow
+  Funding and capital structure
+  Corporate finance
+  Personal finance
+ Banking
+  How banks work
+  Commercial banking
+  Investment banking
+  Credit and lending
+  Banking regulation
+  Nepalese banking sector
+  UK financial system
+ Financial markets
+  Stock market
+  Bonds
+  Derivatives
+  Market indices
+  Investing strategies
+  Asset pricing
+  Risk and portfolio theory
+  Efficient market hypothesis
+ Behavioural economics
+  Bounded rationality
+  Cognitive biases in economics
+  Prospect theory
+  Nudges
+ Econometrics
+ Development economics
+ Political economy
+ Informal and black economy
+ Complexity economics
+ History of economic thought
+Business
+ Foundations of business
+  What a business is
+  Value creation
+  Business environment
+ Business models
+  Business model canvas
+  Revenue models
+  Subscription models
+  Platform businesses
+  Creator economy models
+ Strategy
+  Competitive advantage
+  Porter's five forces
+  SWOT analysis
+  Positioning strategy
+  Blue ocean strategy
+  Growth strategies
+  Moats and defensibility
+ Business scaling
+  Unit economics
+  Systems and processes
+  Hiring and delegation
+  Scaling operations
+ Product
+  Product development
+  Product-market fit
+  Minimum viable product
+  Pricing
+  Product life cycle
+ Marketing
+  Market research
+  Audience and positioning
+  Branding
+  Content marketing
+  Digital marketing
+  Distribution
+  Sales funnels
+  Copywriting
+ Sales
+  Sales process
+  Persuasion
+  Customer relationships
+ Business finances
+  Bookkeeping basics
+  Cash flow management
+  Budgeting
+  Pricing and margins
+  Raising capital
+  Valuation basics
+ Operations
+  Operations management
+  Supply chains
+  Logistics
+  Quality management
+  Lean and Six Sigma
+  Food safety management (HACCP)
+  Standards and audits (BRC, ISO)
+ People
+  Leadership
+  Management
+  Team building
+  Motivation at work
+  Negotiation
+  Organisational culture
+  Human resources
+ Entrepreneurship
+  Idea generation
+  Startups
+  Bootstrapping
+  Risk and failure
+ Business law
+  Business structures
+  Contracts
+  Intellectual property
+  Employment law
+  Business lawsuits
+ Business and politics
+  Lobbying and regulation
+  Corruption and unethical business
+ Specific industries
+  Real estate
+  Media
+  Healthcare business
+  Food industry
+  Technology industry
+Earth and space
+ Geology
+  Earth's structure
+   Core, mantle and crust
+  Minerals
+  Rocks and the rock cycle
+   Igneous rocks
+   Sedimentary rocks
+   Metamorphic rocks
+  Plate tectonics
+   Plate boundaries
+   Earthquakes
+   Volcanoes
+   Mountain building
+  Geological time
+   Stratigraphy
+   Radiometric dating
+   Fossils
+  Geomorphology
+   Weathering and erosion
+   Rivers and landforms
+   Glaciers
+  Soil science
+  Natural resources
+  Himalayan geology
+ Meteorology
+  Atmosphere
+   Composition and layers
+   Atmospheric pressure
+   Solar radiation and energy balance
+  Weather systems
+   Air masses and fronts
+   Cyclones and anticyclones
+   Monsoons
+   Storms and tornadoes
+  Clouds and precipitation
+  Wind and global circulation
+  Weather forecasting
+  Climate
+   Climate zones
+   Climate change
+   Greenhouse effect
+   Climate models
+ Oceanography
+  Ocean structure
+  Ocean currents
+  Tides and waves
+  Marine ecosystems
+ Hydrology
+  Water cycle
+  Groundwater
+  Rivers and lakes
+ Geography
+  Physical geography
+   Landforms
+   Biomes
+  Human geography
+   Population geography
+   Urban geography
+   Economic geography
+   Political geography
+  Continents and regions
+  Countries of the world
+  World flags
+  Geography of the UK
+  Geography of the US
+  Geography of Nepal
+  Cartography and maps
+  Geographic information systems
+ Astronomy
+  Night sky and constellations
+  Celestial coordinates
+  Solar system
+   The Sun
+   Planets
+   Moons
+   Asteroids and comets
+  Stars
+  Galaxies in astronomy
+  Observational astronomy
+   Telescopes
+   Astrophotography
+  Space exploration
+Engineering and technology
+ Engineering foundations
+  Engineering design process
+  Engineering drawing
+  Materials science
+   Metals
+   Polymers
+   Ceramics
+   Composites
+   Material properties
+  Strength of materials
+ Mechanical engineering
+  Engineering mechanics
+  Machine elements
+   Gears
+   Bearings
+   Belts and chains
+   Springs
+   Fasteners
+  Mechanisms and linkages
+  Thermodynamics in engineering
+  Fluid machinery
+   Pumps
+   Turbines
+   Compressors
+  Heat transfer in engineering
+  Manufacturing processes
+  Automotive engineering
+   Engine
+    Internal combustion engines
+    Four-stroke cycle
+    Fuel and ignition systems
+   Cooling system
+   Transmission
+    Clutches
+    Gearboxes
+    Differentials
+   Steering
+   Suspension
+   Brakes
+   Electric vehicles
+   Vehicle electrics
+   Car maintenance
+  Bicycle mechanics
+   Drivetrain
+   Brakes on bicycles
+   Wheels
+   Bicycle maintenance
+  Other machines
+ Electrical engineering
+  Circuit analysis
+  Electronic components
+   Resistors, capacitors and inductors
+   Diodes
+   Transistors
+   Integrated circuits
+  Analogue electronics
+  Digital electronics
+  Power electronics
+  Electrical machines
+  Power systems and the grid
+  Signal processing
+  Control systems
+   Feedback control
+   PID controllers
+  Sensors and actuators
+  Microcontrollers
+ Construction
+  Building fundamentals
+  Foundations and structures
+  Building materials
+  Domestic electrics
+   Wiring and circuits
+   Consumer units and safety
+   Lighting and sockets
+  Plumbing
+   Water supply systems
+   Drainage
+   Heating systems
+   Boilers
+  Carpentry
+  Building regulations
+ Civil engineering
+  Structural engineering
+  Geotechnical engineering
+  Transport engineering
+  Water engineering
+ Energy technology
+  Fossil fuel power
+  Nuclear power
+  Renewable energy
+   Solar power
+   Wind power
+   Hydropower
+   Geothermal
+   Bioenergy
+  Energy storage technology
+  Hydrogen
+ Chemical and process engineering
+  Unit operations
+  Food processing
+ Biomedical engineering
+  Medical devices
+  Biomaterials
+  Neurotechnology
+ Systems engineering
+  Systems thinking
+  Reliability engineering
+ Robotics
+ Telecommunications
+Humanities and arts
+ Philosophy
+  Logic in philosophy
+  Epistemology
+   Theories of knowledge
+   Justification
+   Scepticism
+  Philosophy of science
+   Scientific method
+   Falsification
+   Paradigms and revolutions
+   Reductionism and emergence
+   Explanation and models
+  Philosophy of mind
+   Mind-body problem
+   Consciousness in philosophy
+   Free will
+  Metaphysics
+   Ontology
+   Causation
+   Time
+   Identity
+  Ethics
+   Consequentialism
+   Deontology
+   Virtue ethics
+   Applied ethics
+  Philosophy of mathematics
+  Philosophy of language
+  Political philosophy
+  Aesthetics
+  Eastern philosophy
+   Vedanta
+   Samkhya
+   Buddhist philosophy
+   Taoism
+  History of philosophy
+ History
+  Prehistory
+  Human origins and populations
+  Ancient civilisations
+  Classical antiquity
+  Medieval history
+  Early modern history
+  Modern history
+  World wars
+  History of the UK
+  History of the US
+  History of Nepal and South Asia
+  History of science
+  History of medicine
+  History of technology
+  Historiography
+ Language and linguistics
+  Linguistics
+   Phonetics and phonology
+   Morphology
+   Syntax
+   Semantics
+   Pragmatics
+   Historical linguistics
+   Language acquisition
+  English
+   English grammar
+   English verbs and tenses
+   Vocabulary
+   Pronunciation
+   Speaking and fluency
+   Writing style
+  Sanskrit
+   Devanagari script
+   Sanskrit grammar
+   Sanskrit tenses
+  Nepali
+  Hindi
+ Literature
+  Literary forms
+  Literary analysis
+  World literature
+ Music theory
+  Pitch and intervals
+  Scales and modes
+  Harmony
+  Chords and progressions
+  Rhythm and meter
+  Melody
+  Form and structure
+  Musical acoustics
+  Indian classical music
+  Music and mathematics
+ Religion and spirituality
+  Comparative religion
+  Hinduism
+   Vedas and Upanishads
+   Bhagavad Gita
+   Hindu philosophy schools
+   Hindu practice and ritual
+  Buddhism
+   Four noble truths
+   Buddhist schools
+   Meditation in Buddhism
+  Christianity
+  Islam
+  Judaism
+  Contemplative practice
+   Meditation
+   Yoga
+  Mysticism
+ Vedic sciences
+  Vedic astronomy
+  Jyotish
+   Rashis and houses
+   Planets (grahas)
+   Nakshatras
+   Divisional charts
+   Dashas
+   Strength systems (Shadbala, Ashtakavarga)
+  Vedic mathematics
+  Ayurveda
+ Visual arts and design
+  Drawing
+  Composition
+  Colour theory
+  Typography
+  Graphic design
+  Logo design
+  Photography
+  Film and cinematography
+  Animation art
+ Science communication
+  Storytelling
+  Visual explanation
+  Scriptwriting
+  Storyboarding
+  Narration and voice
+  Video editing
+  Audience and distribution
+ Fiction and fandoms
+  Mythology and worldbuilding
+  Fantasy literature
+  Anime and manga
+  Video game worlds
+Society and law
+ Sociology
+  Social structure
+  Culture
+  Social institutions
+  Social stratification
+  Social change
+ Anthropology
+  Cultural anthropology
+  Biological anthropology
+  Human diversity
+ Political science
+  Political systems
+  Political ideologies
+  Elections and democracy
+  International relations
+  Public policy
+  UK government
+  US government
+  Politics of Nepal
+ Law
+  Legal systems
+  Constitutional law
+  Criminal law
+  Contract law
+  Tort law
+  Employment law in practice
+  Regulatory and food law
+  Medical law
+ Education
+  Education systems
+  Pedagogy
+ Media and communication
+  Mass media
+  Social media
+  Information ecosystems
+Life and practice
+ Personal development
+  Execution and productivity
+   Goal setting
+   Time blocking
+   Habits
+   Focus and deep work
+   Overcoming procrastination
+  Learning how to learn
+   Study methods
+   Exam preparation
+   Learning tools
+   Note-taking systems
+  Interpersonal skills
+   Communication
+   Conflict resolution
+   Relationships
+  Leadership in practice
+  Decision making in practice
+ Health and fitness
+  Nutrition in practice
+  Exercise and training
+  Sleep
+  Mental health practices
+ Home
+  Home maintenance
+  DIY
+  Home finances
+ Gardening
+  Soil and compost
+  Growing vegetables
+  Fruit trees and orchards
+  Plant care
+  Water and irrigation
+ Cooking
+  Cooking techniques
+  Food safety at home
+ Travel
+  Trip planning
+  Places visited`;
+
+const W=[0,0.02,0.08,0.25,0.55,1];
+const LEVELS=['Not logged','First encounter','Grasped the meaning','Can explain it','Can use with reference','Competent, spontaneous use'];
+const LS_KEY='km.v1', UI_KEY='km.ui.v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+let S={logs:{},custom:[]};
+let N={},ROOTS=[],ST={};
+let EXP=new Set();
+try{const l=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(l&&l.logs){S.logs=l.logs;S.custom=l.custom||[];}}catch(e){}
+try{EXP=new Set(JSON.parse(localStorage.getItem(UI_KEY)||'[]'));}catch(e){}
+
+function build(){
+ N={};ROOTS=[];const st=[];
+ SYL.split('\n').forEach(line=>{
+  if(!line.trim())return;
+  const d=line.length-line.trimStart().length, name=line.trim(), p=d?st[d-1]:null;
+  const id=(p?p.id+'/':'')+slug(name);
+  const n={id,name,parent:p?p.id:null,kids:[],custom:false,depth:d};
+  N[id]=n;(p?p.kids:ROOTS).push(n);st[d]=n;st.length=d+1;
+ });
+ S.custom.forEach(c=>{
+  const p=c.parent?N[c.parent]:null;
+  if((c.parent&&!p)||N[c.id])return;
+  const n={id:c.id,name:c.name,parent:c.parent||null,kids:[],custom:true,depth:p?p.depth+1:0};
+  N[c.id]=n;(p?p.kids:ROOTS).push(n);
+ });
+}
+const entries=id=>S.logs[id]||[];
+const lvl=id=>{const L=entries(id);return L.length?L[L.length-1].lvl:0};
+function stats(){
+ ST={};
+ const rec=n=>{
+  if(!n.kids.length){const l=lvl(n.id);return ST[n.id]={leaves:1,sum:W[l],logged:l>0?1:0};}
+  const a={leaves:0,sum:0,logged:0};
+  n.kids.forEach(k=>{const s=rec(k);a.leaves+=s.leaves;a.sum+=s.sum;a.logged+=s.logged;});
+  return ST[n.id]=a;
+ };
+ const t={leaves:0,sum:0,logged:0};
+ ROOTS.forEach(r=>{const s=rec(r);t.leaves+=s.leaves;t.sum+=s.sum;t.logged+=s.logged;});
+ ST._all=t;
+}
+const pct=x=>{const v=x*100;return (v===0?'0':v<10?v.toFixed(2):v.toFixed(1))+'%'};
+const pathOf=id=>{const out=[];let n=N[id];while(n){out.unshift(n);n=n.parent?N[n.parent]:null;}return out;};
+
+function renderHeader(){
+ const t=ST._all;
+ $('#fDepth').textContent=pct(t.sum/t.leaves);
+ $('#fCov').textContent=pct(t.logged/t.leaves);
+ $('#fCount').textContent=t.logged.toLocaleString();
+ $('#fCountL').textContent='of '+t.leaves.toLocaleString()+' topics';
+ $('#strip').innerHTML=ROOTS.map(r=>{
+  const s=ST[r.id],d=s.sum/s.leaves,c=s.logged/s.leaves;
+  return `<button class="seg" style="flex-grow:${s.leaves}" data-dom="${esc(r.id)}" title="${esc(r.name)}: competence ${pct(d)}, touched ${pct(c)}, ${s.leaves} topics"><span class="cov" style="height:${c*100}%"></span><span class="dep" style="height:${d*100}%"></span><em>${esc(r.name)}</em></button>`;
+ }).join('');
+}
+
+function visibleSet(){
+ const q=$('#q').value.trim().toLowerCase(), f=$('#filter').value;
+ if(!q&&f==='all')return null;
+ const vis=new Set();
+ Object.values(N).forEach(n=>{
+  if(q&&!n.name.toLowerCase().includes(q))return;
+  const l=lvl(n.id);
+  if(f==='logged'&&l===0)return;
+  if(f==='unlogged'&&(l>0||n.kids.length))return;
+  let p=n;while(p&&!vis.has(p.id)){vis.add(p.id);p=p.parent?N[p.parent]:null;}
+  if(q&&f==='all'){const add=k=>{vis.add(k.id);k.kids.forEach(add)};n.kids.forEach(add);}
+ });
+ return vis;
+}
+function meter(l){let h='';for(let i=1;i<=5;i++)h+=`<i class="${i<=l?'on':''}"></i>`;return `<span class="meter" title="${esc(LEVELS[l])}" aria-label="Depth: ${esc(LEVELS[l])}">${h}</span>`;}
+function row(n,open,forced){
+ const kids=n.kids.length>0, l=lvl(n.id), L=entries(n.id);
+ const last=L.length?L[L.length-1]:null;
+ let agg='';
+ if(kids){const s=ST[n.id];agg=`<span class="agg" title="${s.logged} of ${s.leaves} touched, competence ${pct(s.sum/s.leaves)}"><span class="bar"><s style="width:${s.logged/s.leaves*100}%"></s><i style="width:${s.sum/s.leaves*100}%"></i></span><span class="pc">${pct(s.sum/s.leaves)}</span></span>`;}
+ const nt=last?`<span class="nt ${last.notes?'ok':'no'}" title="${last.notes?'Notes made at this level':'No notes yet at this level'}">${last.notes?'✓':'✗'}</span>`:'<span class="nt"></span>';
+ return `<div class="row d${Math.min(n.depth,3)}${n.depth===0?' dom':''}${kids?' hasKids':''}" style="--d:${n.depth}" data-id="${esc(n.id)}">
+<button class="tw ${kids?(open?'open':''):'none'}" data-act="toggle" aria-label="${open?'Collapse':'Expand'} ${esc(n.name)}" ${kids&&!forced?'':'tabindex="-1"'}>▸</button>
+<span class="nm" data-act="${kids?'toggle':''}">${esc(n.name)}${n.custom?'<span class="custom-tag">added</span>':''}</span>
+${agg}${meter(l)}${nt}
+<button class="act log" data-act="log">Log</button>
+<button class="act" data-act="add" aria-label="Add subtopic under ${esc(n.name)}" title="Add subtopic">+</button>
+${n.custom?`<button class="act del" data-act="del" aria-label="Delete ${esc(n.name)}">Delete</button>`:''}
+</div>`;
+}
+function renderList(){
+ stats();
+ const vis=visibleSet(),out=[];
+ const walk=n=>{
+  if(vis&&!vis.has(n.id))return;
+  const open=vis?true:EXP.has(n.id);
+  out.push(row(n,open,!!vis));
+  if(n.kids.length&&open)n.kids.forEach(walk);
+ };
+ ROOTS.forEach(walk);
+ $('#list').innerHTML=out.join('')||'<div class="empty">No topics match. Clear the search, or add the topic where it belongs with +.</div>';
+ renderHeader();
+}
+
+const saveUI=()=>{try{localStorage.setItem(UI_KEY,JSON.stringify([...EXP]))}catch(e){}};
+$('#list').addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b||!b.dataset.act)return;
+ const id=b.closest('.row').dataset.id,act=b.dataset.act;
+ if(act==='toggle'){if($('#q').value.trim()||$('#filter').value!=='all')return;EXP.has(id)?EXP.delete(id):EXP.add(id);saveUI();renderList();}
+ else if(act==='log')openLog(id);
+ else if(act==='add')openAdd(id);
+ else if(act==='del'){
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Confirm delete';setTimeout(()=>{b.classList.remove('arm');b.textContent='Delete'},3000);return;}
+  deleteCustom(id);
+ }
+});
+$('#strip').addEventListener('click',e=>{
+ const s=e.target.closest('.seg');if(!s)return;
+ $('#q').value='';$('#filter').value='all';
+ EXP.add(s.dataset.dom);saveUI();renderList();
+ const r=document.querySelector(`.row[data-id="${CSS.escape(s.dataset.dom)}"]`);if(r)r.scrollIntoView({block:'start'});
+});
+let qT;$('#q').addEventListener('input',()=>{clearTimeout(qT);qT=setTimeout(renderList,120)});
+$('#filter').addEventListener('change',renderList);
+$('#collapse').addEventListener('click',()=>{EXP.clear();saveUI();renderList();});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+ $('#listView').hidden=t.dataset.tab!=='list';$('#visualView').hidden=t.dataset.tab!=='visual';
+}));
+
+let CUR=null;
+function openLog(id){
+ CUR=id;const n=N[id],p=pathOf(id),l=lvl(id);
+ $('#lCrumb').textContent=p.slice(0,-1).map(x=>x.name).join(' / ')||'Domain';
+ $('#lName').textContent=n.name;
+ $('#lCur').textContent=l?`Now at ${l}: ${LEVELS[l]}`:'Not logged yet';
+ const def=l?Math.min(l+1,5):1;
+ $('#lLevels').innerHTML=[1,2,3,4,5].map(i=>`<label class="${i===l?'was':''}"><input type="radio" name="lvl" value="${i}" ${i===def?'checked':''}><span class="n">${i}</span><span>${LEVELS[i]}</span></label>`).join('');
+ $('#lCtx').value='';$('#lNotes').checked=false;$('#lReview').checked=false;$('#lErr').textContent='';
+ const ctx=[];Object.values(S.logs).flat().sort((a,b)=>b.t<a.t?-1:1).forEach(x=>{if(x.ctx&&!ctx.includes(x.ctx))ctx.push(x.ctx)});
+ $('#ctxList').innerHTML=ctx.slice(0,40).map(c=>`<option value="${esc(c)}">`).join('');
+ updateReview();renderHist();
+ $('#logDlg').showModal();
+}
+function selLvl(){const r=document.querySelector('input[name=lvl]:checked');return r?+r.value:1;}
+function updateReview(){
+ const need=entries(CUR).length>0&&selLvl()>lvl(CUR);
+ $('#lReviewWrap').hidden=!need;
+ $('#lSave').textContent=lvl(CUR)&&selLvl()>lvl(CUR)?'Upgrade':'Log it';
+}
+$('#lLevels').addEventListener('change',()=>{$('#lErr').textContent='';updateReview();});
+$('#lReview').addEventListener('change',()=>{$('#lErr').textContent='';});
+function renderHist(){
+ const L=entries(CUR);
+ if(!L.length){$('#lHist').innerHTML='<li class="none-yet">Nothing logged yet.</li>';return;}
+ $('#lHist').innerHTML=L.map((x,i)=>({x,i})).reverse().map(({x,i})=>`<li>
+<span class="lv">${x.lvl}: ${esc(LEVELS[x.lvl])}</span><time datetime="${esc(x.t)}">${new Date(x.t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}</time>
+<span class="cx">${x.ctx?esc(x.ctx):'<span style="color:var(--faint)">No context</span>'}</span>
+<span class="hb"><button class="${x.notes?'ok':''}" data-h="notes" data-i="${i}" aria-label="Toggle notes">Notes ${x.notes?'✓':'✗'}</button><button data-h="rm" data-i="${i}">Remove</button></span></li>`).join('');
+}
+$('#lHist').addEventListener('click',e=>{
+ const b=e.target.closest('[data-h]');if(!b)return;
+ const L=entries(CUR),i=+b.dataset.i;
+ if(b.dataset.h==='notes'){L[i].notes=!L[i].notes;commit();renderHist();}
+ else{
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Confirm';setTimeout(()=>{if(b.isConnected){b.classList.remove('arm');b.textContent='Remove'}},3000);return;}
+  L.splice(i,1);if(!L.length)delete S.logs[CUR];commit();renderHist();
+  const l=lvl(CUR);$('#lCur').textContent=l?`Now at ${l}: ${LEVELS[l]}`:'Not logged yet';updateReview();
+ }
+});
+$('#lSave').addEventListener('click',()=>{
+ const v=selLvl(),cur=lvl(CUR);
+ if(entries(CUR).length&&v>cur&&!$('#lReview').checked){$('#lErr').textContent='Tick the review box first. Upgrades need a pass through your earlier notes.';return;}
+ (S.logs[CUR]=S.logs[CUR]||[]).push({t:new Date().toISOString(),lvl:v,ctx:$('#lCtx').value.trim(),notes:$('#lNotes').checked});
+ commit();$('#logDlg').close();toast(`Logged ${N[CUR].name} at ${v}: ${LEVELS[v]}`);
+});
+$('#lClose').addEventListener('click',()=>$('#logDlg').close());
+
+let ADDP=null;
+function openAdd(pid){
+ ADDP=pid;$('#aName').value='';$('#aErr').textContent='';
+ $('#aTitle').textContent=pid?'Add subtopic':'Add domain';
+ $('#aCrumb').textContent=pid?pathOf(pid).map(x=>x.name).join(' / '):'Top level';
+ $('#addDlg').showModal();$('#aName').focus();
+}
+function doAdd(){
+ const name=$('#aName').value.trim();
+ if(!name){$('#aErr').textContent='Enter a name first.';return;}
+ const sibs=ADDP?N[ADDP].kids:ROOTS;
+ if(sibs.some(k=>k.name.toLowerCase()===name.toLowerCase())){$('#aErr').textContent='That name already exists here.';return;}
+ const id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ S.custom.push({id,parent:ADDP,name,t:new Date().toISOString()});
+ if(ADDP)EXP.add(ADDP);saveUI();
+ build();commit();$('#addDlg').close();toast(`Added ${name}`);
+}
+$('#aSave').addEventListener('click',doAdd);
+$('#aName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doAdd();}});
+$('#aName').addEventListener('input',()=>$('#aErr').textContent='');
+$('#aCancel').addEventListener('click',()=>$('#addDlg').close());
+$('#addDomain').addEventListener('click',()=>openAdd(null));
+function deleteCustom(id){
+ const gone=new Set();const add=n=>{gone.add(n.id);n.kids.forEach(add)};add(N[id]);
+ S.custom=S.custom.filter(c=>!gone.has(c.id));gone.forEach(g=>delete S.logs[g]);
+ const name=N[id].name;build();commit();toast(`Deleted ${name}`);
+}
+
+function pack(){return {app:'knowledge-model',v:1,syllabus:SYL_V,exportedAt:new Date().toISOString(),logs:S.logs,custom:S.custom};}
+const today=()=>new Date().toISOString().slice(0,10);
+$('#backup').addEventListener('click',()=>{
+ const json=JSON.stringify(pack(),null,1);
+ try{
+  const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  const el=document.createElement('a');el.href=url;el.download=`knowledge-map-backup-${today()}.json`;
+  document.body.appendChild(el);el.click();el.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast('Backup downloaded');
+ }catch(e){$('#cText').value=json;$('#copyDlg').showModal();}
+});
+$('#cCopy').addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText($('#cText').value);toast('Backup copied');}
+ catch(e){$('#cText').select();toast('Select all and copy manually');}
+});
+$('#cClose').addEventListener('click',()=>$('#copyDlg').close());
+$('#restore').addEventListener('click',()=>{$('#rFile').value='';$('#rText').value='';$('#rErr').textContent='';$('#resDlg').showModal();});
+$('#rCancel').addEventListener('click',()=>$('#resDlg').close());
+$('#rFile').addEventListener('change',()=>{
+ const f=$('#rFile').files[0];if(!f)return;
+ const r=new FileReader();r.onload=()=>{$('#rText').value=r.result;$('#rErr').textContent='';};r.readAsText(f);
+});
+$('#rGo').addEventListener('click',()=>{
+ let o;try{o=JSON.parse($('#rText').value);}catch(e){$('#rErr').textContent='That text isn\'t valid backup JSON. Choose the .json file this app saved.';return;}
+ if(!o||o.app!=='knowledge-model'||typeof o.logs!=='object'){$('#rErr').textContent='This isn\'t a knowledge model backup. It needs "app": "knowledge-model".';return;}
+ S.logs=o.logs||{};S.custom=Array.isArray(o.custom)?o.custom:[];
+ build();commit();$('#resDlg').close();
+ const n=Object.values(S.logs).reduce((a,L)=>a+L.length,0);
+ toast(`Backup restored: ${n} log entries`);
+});
+
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+function setStatus(s){
+ const el=$('#status');el.className='status '+s;
+ el.querySelector('span').textContent=s==='account'?'Synced':s==='saving'?'Saving…':'Saved on this device';
+}
+
+let DBREF=null,writing=false,pending=false,dbT=null;
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify({logs:S.logs,custom:S.custom}))}catch(e){}}
+function commit(){saveLocal();renderList();if(DBREF){setStatus('saving');clearTimeout(dbT);dbT=setTimeout(flush,1200);}}
+async function flush(){
+ if(!DBREF)return;
+ if(writing){pending=true;return;}
+ writing=true;
+ try{
+  const json=JSON.stringify({logs:S.logs,custom:S.custom});
+  await DBREF.set({app:'knowledge-model',v:1,savedAt:new Date().toISOString(),json});
+  setStatus('account');
+  if(json.length>200000)toast('Storage is filling up. Back up, and ask Claude to split the store.');
+ }catch(e){setStatus('device');}
+ writing=false;
+ if(pending){pending=false;flush();}
+}
+/* Remote storage seam. Firebase attaches here in the next step:
+   set DBREF to an object with set(data) -> Promise, load saved state before first render,
+   and flush() will start syncing automatically. Until then everything lives in localStorage. */
+async function connect(){}
+
+build();renderList();connect();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
