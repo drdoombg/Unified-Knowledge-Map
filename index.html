@@ -32,7 +32,11 @@ h1{font-size:15px;font-weight:500;color:var(--muted);margin:0;letter-spacing:.01
 .fig b{display:block;font-size:40px;font-weight:500;line-height:1.05;letter-spacing:-.02em}
 .fig span{font-size:13px;color:var(--muted)}
 .fig.small b{font-size:24px;color:#cfd9f2}
-.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;justify-self:end}
+.status{font:inherit;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;justify-self:end;background:none;border:0;padding:6px 0;cursor:pointer}
+.status:hover{color:var(--text)}
+dialog p.sp{margin:0 0 4px;font-size:14px;color:var(--muted);line-height:1.55}
+dialog p.sp code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--text)}
+.sgrow{display:grid;gap:10px;margin-top:4px}
 h1 .ver{color:var(--faint);font-weight:400;margin-left:6px}
 .status i{width:7px;height:7px;border-radius:50%;background:var(--faint);display:inline-block}
 .status.account i{background:var(--ok)}.status.saving i{background:var(--ice)}.status.device i{background:var(--warn)}
@@ -141,7 +145,7 @@ textarea.field{min-height:160px;font-size:12px;font-family:ui-monospace,Menlo,Co
    <div class="fig small"><b id="fCount">0</b><span id="fCountL">of 0 topics</span></div>
   </div>
  </div>
- <div class="status device" id="status"><i></i><span>Saved on this device</span></div>
+ <button class="status device" id="status" type="button" aria-label="Sync status and sign-in"><i></i><span>Saved on this device</span></button>
 </header>
 <div class="strip" id="strip" aria-label="Domains"></div>
 <div class="legend"><span class="l1">Competence</span><span class="l2">Touched at any level</span><span>Segment width = number of topics in the domain</span></div>
@@ -226,7 +230,17 @@ textarea.field{min-height:160px;font-size:12px;font-family:ui-monospace,Menlo,Co
  </div>
 </dialog>
 
+<dialog id="syncDlg">
+ <div class="dh"><div class="crumb">Sync</div><h2 id="syncSub">Sync</h2></div>
+ <div class="db">
+  <div id="syncBody"></div>
+  <div class="err" id="syncErr" role="alert"></div>
+  <div class="dfoot" id="syncBtns"></div>
+ </div>
+</dialog>
+
 <div class="toast" id="toast" role="status"></div>
+<script src="firebase-config.js"></script>
 
 <script>
 const SYL_V='2026-10-04c';
@@ -3237,12 +3251,19 @@ function build(){
   const n={id,name,parent:p?p.id:null,kids:[],custom:false,depth:d};
   N[id]=n;(p?p.kids:ROOTS).push(n);st[d]=n;st.length=d+1;
  });
- S.custom.forEach(c=>{
-  const p=c.parent?N[c.parent]:null;
-  if((c.parent&&!p)||N[c.id])return;
-  const n={id:c.id,name:c.name,parent:c.parent||null,kids:[],custom:true,depth:p?p.depth+1:0};
-  N[c.id]=n;(p?p.kids:ROOTS).push(n);
- });
+ let todo=S.custom.slice(),moved=true;
+ while(todo.length&&moved){
+  moved=false;
+  todo=todo.filter(c=>{
+   const p=c.parent?N[c.parent]:null;
+   if(c.parent&&!p)return true;
+   if(!N[c.id]){
+    const n={id:c.id,name:c.name,parent:c.parent||null,kids:[],custom:true,depth:p?p.depth+1:0};
+    N[c.id]=n;(p?p.kids:ROOTS).push(n);moved=true;
+   }
+   return false;
+  });
+ }
 }
 const entries=id=>S.logs[id]||[];
 const lvl=id=>{const L=entries(id);return L.length?L[L.length-1].lvl:0};
@@ -3452,33 +3473,211 @@ $('#rGo').addEventListener('click',()=>{
 });
 
 let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
-function setStatus(s){
+function setStatus(s,label){
  const el=$('#status');el.className='status '+s;
- el.querySelector('span').textContent=s==='account'?'Synced':s==='saving'?'Saving…':'Saved on this device';
+ el.querySelector('span').textContent=label||(s==='account'?'Synced':s==='saving'?'Saving…':'Saved on this device');
 }
-
-let DBREF=null,writing=false,pending=false,dbT=null;
 function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify({logs:S.logs,custom:S.custom}))}catch(e){}}
-function commit(){saveLocal();renderList();if(DBREF){setStatus('saving');clearTimeout(dbT);dbT=setTimeout(flush,1200);}}
-async function flush(){
- if(!DBREF)return;
- if(writing){pending=true;return;}
- writing=true;
- try{
-  const json=JSON.stringify({logs:S.logs,custom:S.custom});
-  await DBREF.set({app:'knowledge-model',v:1,savedAt:new Date().toISOString(),json});
-  setStatus('account');
-  if(json.length>200000)toast('Storage is filling up. Back up, and ask Claude to split the store.');
- }catch(e){setStatus('device');}
- writing=false;
- if(pending){pending=false;flush();}
-}
-/* Remote storage seam. Firebase attaches here in the next step:
-   set DBREF to an object with set(data) -> Promise, load saved state before first render,
-   and flush() will start syncing automatically. Until then everything lives in localStorage. */
-async function connect(){}
+function commit(){saveLocal();renderList();const ch=diffLocal();if(ch.length)queuePush(ch);}
 
-build();renderList();connect();
+/* ---------- sync (Firebase) ----------
+   Local-first: the app always works from localStorage. When signed in, every topic's log history
+   (and every custom node) is a record {u: last-change time, v: value, null = deleted} stored in
+   per-domain Firestore documents. The newest u wins per record, so two devices only collide when
+   they edit the very same topic. Deletions are kept as tombstones so they propagate. */
+const SYNC_KEY='km.sync.v1',FB_VER='12.19.0';
+const FB=n=>`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${n}.js`;
+const DOMSLUG=new Set(SYL.split('\n').filter(l=>l.trim()&&l[0]!==' ').map(l=>slug(l.trim())));
+let U={};try{U=JSON.parse(localStorage.getItem(SYNC_KEY)||'{}').u||{};}catch(e){}
+let SNAP=new Map();
+const PEND=new Set();
+const SYNC={state:'init',ready:false,got:false,uid:null,email:null,fs:null,db:null,auth:null,api:null,unsub:null,remote:{},last:null,err:null};
+let pushT=null,retryT=null;
+const fk=k=>k.replace(/\//g,'~'),unfk=k=>k.replace(/~/g,'/');
+const saveU=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify({u:U}))}catch(e){}};
+
+function recs(){
+ const m=new Map();
+ for(const id in S.logs){const e=S.logs[id];if(e&&e.length)m.set('l:'+id,JSON.stringify(e));}
+ S.custom.forEach(c=>m.set('c:'+c.id,JSON.stringify({parent:c.parent||null,name:c.name,t:c.t||''})));
+ return m;
+}
+function valOf(key){
+ const id=key.slice(2);
+ if(key[0]==='l'){const e=S.logs[id];return e&&e.length?e:null;}
+ const c=S.custom.find(x=>x.id===id);
+ return c?{parent:c.parent||null,name:c.name,t:c.t||''}:null;
+}
+function derivedU(key){
+ const v=valOf(key);if(!v)return 1;
+ if(key[0]==='l')return v.reduce((a,x)=>Math.max(a,Date.parse(x.t)||0),0)||1;
+ return Date.parse(v.t)||1;
+}
+function bucketOf(key){const first=key.slice(2).split('/')[0];return DOMSLUG.has(first)?first:'custom';}
+function initSync(){
+ recs().forEach((v,k)=>{if(!(k in U))U[k]=derivedU(k);});
+ SNAP=recs();saveU();
+}
+function diffLocal(){
+ const cur=recs(),changed=[];
+ const bump=k=>{U[k]=Math.max(Date.now(),(U[k]||0)+1);changed.push(k);};
+ cur.forEach((v,k)=>{if(SNAP.get(k)!==v)bump(k);});
+ SNAP.forEach((v,k)=>{if(!cur.has(k))bump(k);});
+ SNAP=cur;if(changed.length)saveU();
+ return changed;
+}
+function queuePush(keys){
+ keys.forEach(k=>PEND.add(k));
+ if(SYNC.ready){setStatus('saving');clearTimeout(pushT);pushT=setTimeout(flushPush,800);}
+}
+function computePending(){
+ Object.keys(U).forEach(k=>{
+  const r=SYNC.remote[k];
+  if(r===undefined){if(valOf(k)!==null)PEND.add(k);}
+  else if(r<U[k])PEND.add(k);
+ });
+}
+async function flushPush(){
+ if(!SYNC.ready||!PEND.size)return;
+ const by={};
+ [...PEND].forEach(k=>{const b=bucketOf(k);(by[b]=by[b]||{})[fk(k)]={u:U[k],v:valOf(k)};});
+ const {doc,setDoc}=SYNC.fs;let ok=true;
+ for(const b of Object.keys(by)){
+  try{
+   await Promise.race([
+    setDoc(doc(SYNC.db,'users',SYNC.uid,'map',b),{r:by[b],updatedAt:Date.now()},{merge:true}),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+   ]);
+   Object.entries(by[b]).forEach(([f,rec])=>{const k=unfk(f);SYNC.remote[k]=rec.u;if(U[k]===rec.u)PEND.delete(k);});
+  }catch(e){ok=false;SYNC.err=e;}
+ }
+ if(ok){
+  SYNC.last=Date.now();
+  if(PEND.size){pushT=setTimeout(flushPush,300);setStatus('saving');}else setStatus('account');
+ }else{
+  const denied=SYNC.err&&SYNC.err.code==='permission-denied';
+  setStatus('device',denied?'Blocked by Firestore rules':'Offline, will sync');
+  clearTimeout(retryT);retryT=setTimeout(flushPush,20000);
+ }
+ refreshSyncDlg();
+}
+window.addEventListener('online',()=>{if(SYNC.ready&&PEND.size)flushPush();});
+
+function applyRec(k,v){
+ const id=k.slice(2);
+ if(k[0]==='l'){
+  if(Array.isArray(v)&&v.length)S.logs[id]=v.map(x=>({...x}));else delete S.logs[id];
+ }else{
+  S.custom=S.custom.filter(c=>c.id!==id);
+  if(v&&typeof v==='object')S.custom.push({id,parent:v.parent||null,name:String(v.name||''),t:v.t||''});
+ }
+}
+function onRemote(snap){
+ let any=false,cust=false;
+ snap.forEach(d=>{
+  const r=(d.data()||{}).r||{};
+  Object.keys(r).forEach(f=>{
+   const rec=r[f],k=unfk(f);
+   if(!rec||typeof rec.u!=='number')return;
+   SYNC.remote[k]=rec.u;
+   if(rec.u>(U[k]||0)){applyRec(k,rec.v);U[k]=rec.u;any=true;if(k[0]==='c')cust=true;}
+  });
+ });
+ if(any){if(cust)build();saveLocal();saveU();SNAP=recs();renderList();}
+ if(!(snap.metadata&&snap.metadata.fromCache)){SYNC.got=true;computePending();}
+ if(PEND.size){setStatus('saving');clearTimeout(pushT);pushT=setTimeout(flushPush,300);}
+ else if(SYNC.got){SYNC.last=Date.now();setStatus('account');}
+ else setStatus('saving','Syncing…');
+ refreshSyncDlg();
+}
+function onAuth(user){
+ if(SYNC.unsub){SYNC.unsub();SYNC.unsub=null;}
+ SYNC.ready=false;SYNC.got=false;SYNC.remote={};
+ if(!user){
+  SYNC.state='signedout';SYNC.uid=null;SYNC.email=null;
+  setStatus('device','Sign in to sync');refreshSyncDlg();return;
+ }
+ SYNC.state='signedin';SYNC.uid=user.uid;SYNC.email=user.email;SYNC.ready=true;
+ setStatus('saving','Syncing…');
+ SYNC.unsub=SYNC.fs.onSnapshot(SYNC.fs.collection(SYNC.db,'users',user.uid,'map'),onRemote,e=>{
+  SYNC.err=e;
+  setStatus('device',e&&e.code==='permission-denied'?'Blocked by Firestore rules':'Sync error, saved on device');
+  refreshSyncDlg();
+ });
+ refreshSyncDlg();
+}
+async function startSync(){
+ const cfg=window.KM_FIREBASE;
+ if(!cfg||!cfg.apiKey||!cfg.projectId||/PASTE/i.test(String(cfg.apiKey)+String(cfg.projectId))){
+  SYNC.state='unconfigured';return;
+ }
+ SYNC.state='loading';
+ try{
+  const [appM,authM,fsM]=await Promise.all([import(FB('app')),import(FB('auth')),import(FB('firestore'))]);
+  const app=appM.initializeApp(cfg);
+  SYNC.api=authM;SYNC.auth=authM.getAuth(app);SYNC.fs=fsM;
+  try{SYNC.db=fsM.initializeFirestore(app,{localCache:fsM.persistentLocalCache({tabManager:fsM.persistentMultipleTabManager()})});}
+  catch(e){SYNC.db=fsM.getFirestore(app);}
+  authM.onAuthStateChanged(SYNC.auth,onAuth);
+ }catch(e){SYNC.state='unavailable';setStatus('device','Saved on this device');refreshSyncDlg();}
+}
+
+function authMsg(x){
+ const c=(x&&x.code)||'';
+ if(/invalid-credential|wrong-password|user-not-found|invalid-email/.test(c))return 'Email or password is wrong.';
+ if(c==='auth/too-many-requests')return 'Too many attempts. Wait a few minutes, then try again.';
+ if(c==='auth/network-request-failed')return 'No connection. Try again when you are online.';
+ if(c==='auth/operation-not-allowed')return 'Email/password sign-in is switched off in the Firebase console.';
+ return 'Sign-in failed ('+(c||'unknown')+').';
+}
+function refreshSyncDlg(){
+ const dlg=$('#syncDlg');if(!dlg||!dlg.open)return;renderSyncDlg(true);
+}
+function renderSyncDlg(keepInputs){
+ const st=SYNC.state,body=$('#syncBody'),btns=$('#syncBtns'),sub=$('#syncSub');
+ const close='<button class="btn" data-sg="close">Close</button>';
+ if(keepInputs&&st==='signedout'&&$('#sgEmail'))return;
+ $('#syncErr').textContent='';
+ if(st==='unconfigured'){
+  sub.textContent='Not set up yet';
+  body.innerHTML='<p class="sp">Everything is saved on this device. To sync across devices, put your Firebase details into <code>firebase-config.js</code> in the repository, commit it, then reload this page.</p>';
+  btns.innerHTML=close;
+ }else if(st==='loading'||st==='init'){
+  sub.textContent='Connecting…';body.innerHTML='<p class="sp">Loading Firebase.</p>';btns.innerHTML=close;
+ }else if(st==='unavailable'){
+  sub.textContent='Firebase did not load';
+  body.innerHTML='<p class="sp">This usually means no connection. Everything is still saved on this device.</p>';
+  btns.innerHTML=close+'<button class="btn primary" data-sg="retry">Try again</button>';
+ }else if(st==='signedout'){
+  sub.textContent='Sign in to sync';
+  body.innerHTML='<div class="sgrow"><input class="field" id="sgEmail" type="email" placeholder="Email" autocomplete="username"><input class="field" id="sgPass" type="password" placeholder="Password" autocomplete="current-password"></div><p class="sp" style="margin-top:12px">Signing in merges this device with your account. Nothing is deleted on either side.</p>';
+  btns.innerHTML=close+'<button class="btn primary" data-sg="in">Sign in</button>';
+ }else{
+  sub.textContent=SYNC.got?'Synced':'Syncing…';
+  body.innerHTML=`<p class="sp">Signed in as ${esc(SYNC.email||'')}.</p><p class="sp">${SYNC.last?'Last synced '+new Date(SYNC.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Waiting for the first sync.'}${PEND.size?' · '+PEND.size+' change'+(PEND.size===1?'':'s')+' waiting to upload':''}</p><p class="sp">Signing out keeps this device's data. It just stops syncing.</p>`;
+  btns.innerHTML='<button class="btn" data-sg="out">Sign out</button>'+close+'<button class="btn primary" data-sg="now">Sync now</button>';
+ }
+}
+$('#status').addEventListener('click',()=>{renderSyncDlg(false);$('#syncDlg').showModal();const e=$('#sgEmail');if(e)e.focus();});
+async function doSignIn(){
+ const e=$('#sgEmail').value.trim(),p=$('#sgPass').value;
+ if(!e||!p){$('#syncErr').textContent='Enter your email and password.';return;}
+ $('#syncErr').textContent='';
+ try{await SYNC.api.signInWithEmailAndPassword(SYNC.auth,e,p);$('#syncDlg').close();toast('Signed in. Syncing…');}
+ catch(x){$('#syncErr').textContent=authMsg(x);}
+}
+$('#syncDlg').addEventListener('click',async ev=>{
+ const b=ev.target.closest('[data-sg]');if(!b)return;
+ const a=b.dataset.sg;
+ if(a==='close')$('#syncDlg').close();
+ else if(a==='in')doSignIn();
+ else if(a==='retry'){SYNC.state='loading';renderSyncDlg(false);startSync();}
+ else if(a==='now'){if(SYNC.got)computePending();flushPush();toast('Syncing…');}
+ else if(a==='out'){try{await SYNC.api.signOut(SYNC.auth);$('#syncDlg').close();toast('Signed out');}catch(e){$('#syncErr').textContent='Could not sign out.';}}
+});
+$('#syncDlg').addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.id==='sgPass'){ev.preventDefault();doSignIn();}});
+
+build();initSync();renderList();startSync();
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 </script>
 </body>
