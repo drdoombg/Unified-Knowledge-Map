@@ -3491,7 +3491,8 @@ const DOMSLUG=new Set(SYL.split('\n').filter(l=>l.trim()&&l[0]!==' ').map(l=>slu
 let U={};try{U=JSON.parse(localStorage.getItem(SYNC_KEY)||'{}').u||{};}catch(e){}
 let SNAP=new Map();
 const PEND=new Set();
-const SYNC={state:'init',ready:false,got:false,uid:null,email:null,fs:null,db:null,auth:null,api:null,unsub:null,remote:{},last:null,err:null};
+let stallT=null;
+const SYNC={stalled:false,state:'init',ready:false,got:false,uid:null,email:null,fs:null,db:null,auth:null,api:null,unsub:null,remote:{},last:null,err:null};
 let pushT=null,retryT=null;
 const fk=k=>k.replace(/\//g,'~'),unfk=k=>k.replace(/~/g,'/');
 const saveU=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify({u:U}))}catch(e){}};
@@ -3584,7 +3585,7 @@ function onRemote(snap){
   });
  });
  if(any){if(cust)build();saveLocal();saveU();SNAP=recs();renderList();}
- if(!(snap.metadata&&snap.metadata.fromCache)){SYNC.got=true;computePending();}
+ if(!(snap.metadata&&snap.metadata.fromCache)){SYNC.got=true;SYNC.stalled=false;clearTimeout(stallT);computePending();}
  if(PEND.size){setStatus('saving');clearTimeout(pushT);pushT=setTimeout(flushPush,300);}
  else if(SYNC.got){SYNC.last=Date.now();setStatus('account');}
  else setStatus('saving','Syncing…');
@@ -3592,6 +3593,7 @@ function onRemote(snap){
 }
 function onAuth(user){
  if(SYNC.unsub){SYNC.unsub();SYNC.unsub=null;}
+ clearTimeout(stallT);SYNC.stalled=false;
  SYNC.ready=false;SYNC.got=false;SYNC.remote={};
  if(!user){
   SYNC.state='signedout';SYNC.uid=null;SYNC.email=null;
@@ -3599,7 +3601,8 @@ function onAuth(user){
  }
  SYNC.state='signedin';SYNC.uid=user.uid;SYNC.email=user.email;SYNC.ready=true;
  setStatus('saving','Syncing…');
- SYNC.unsub=SYNC.fs.onSnapshot(SYNC.fs.collection(SYNC.db,'users',user.uid,'map'),onRemote,e=>{
+ stallT=setTimeout(()=>{if(SYNC.ready&&!SYNC.got){SYNC.stalled=true;setStatus('device','Cannot reach Firebase, saved on device');refreshSyncDlg();}},12000);
+ SYNC.unsub=SYNC.fs.onSnapshot(SYNC.fs.collection(SYNC.db,'users',user.uid,'map'),{includeMetadataChanges:true},onRemote,e=>{
   SYNC.err=e;
   setStatus('device',e&&e.code==='permission-denied'?'Blocked by Firestore rules':'Sync error, saved on device');
   refreshSyncDlg();
@@ -3654,7 +3657,7 @@ function renderSyncDlg(keepInputs){
   btns.innerHTML=close+'<button class="btn primary" data-sg="in">Sign in</button>';
  }else{
   sub.textContent=SYNC.got?'Synced':'Syncing…';
-  body.innerHTML=`<p class="sp">Signed in as ${esc(SYNC.email||'')}.</p><p class="sp">${SYNC.last?'Last synced '+new Date(SYNC.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Waiting for the first sync.'}${PEND.size?' · '+PEND.size+' change'+(PEND.size===1?'':'s')+' waiting to upload':''}</p><p class="sp">Signing out keeps this device's data. It just stops syncing.</p>`;
+  body.innerHTML=`<p class="sp">Signed in as ${esc(SYNC.email||'')}.</p><p class="sp">${SYNC.last?'Last synced '+new Date(SYNC.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Waiting for the first sync.'}${SYNC.stalled?'</p><p class="sp">Firebase is not answering. An ad or tracker blocker can cause this: try a private window with extensions off. Your data is safe on this device and uploads once the connection works.':''}${PEND.size?' · '+PEND.size+' change'+(PEND.size===1?'':'s')+' waiting to upload':''}</p><p class="sp">Signing out keeps this device's data. It just stops syncing.</p>`;
   btns.innerHTML='<button class="btn" data-sg="out">Sign out</button>'+close+'<button class="btn primary" data-sg="now">Sync now</button>';
  }
 }
